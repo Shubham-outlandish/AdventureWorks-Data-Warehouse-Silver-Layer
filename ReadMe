@@ -1,1 +1,177 @@
+🧱 AdventureWorks Data Warehouse – Silver Layer (Sales Schema)
+📌 Overview
 
+This project implements the Silver Layer transformation of the AdventureWorks dataset, focusing on the Sales domain.
+
+The goal of the Silver layer is to:
+
+Clean and standardize Bronze/raw data
+Combine normalized tables into analysis-friendly entities
+Reduce join complexity for downstream users
+Prepare structured datasets for Gold layer (BI / Power BI dashboards)
+
+🏗️ Architecture
+
+🔹 Bronze Layer (Source)
+Raw tables from adventureworks2019
+Highly normalized
+Not optimized for analytics
+
+🔹 Silver Layer (This Implementation)
+Created in: adventureworks_silver
+Schema used: sales, production
+Uses SQL Views to:
+Flatten relationships
+Add business context
+Handle nulls and defaults
+Improve readability
+
+🎯 Design Principles
+1. Domain-Based Modeling
+
+Instead of keeping tables fragmented, data is grouped into business entities:
+
+Customer
+Sales
+Product
+Payment
+Salesperson
+
+2. View-Based Transformation
+No physical duplication of data
+Views act as logical data models
+Ensures:
+Maintainability
+Real-time reflection of source updates
+
+3. Data Enrichment
+
+Multiple tables are combined to provide:
+
+Full names (concat_ws)
+Geographic hierarchy (City → State → Country)
+Product categorization
+Sales reasons and metadata
+4. Null Handling & Defaults
+COALESCE() used for missing values
+Default labels like 'Other' for unknown categories
+5. Reusable CTEs
+
+Common patterns extracted using CTEs:
+
+PersonAddress
+PersonDetails
+product_detail
+sales_reason
+📊 Implemented Views
+🧑‍💼 sales.Customer_Demographics
+
+Purpose:
+Unified customer profile including:
+
+Personal details
+Address & geography
+Store association
+Sales territory
+
+Key Transformations:
+
+Combines Customer, Person, Store, Territory
+Resolves both individual customers and store customers
+Maps SalesPerson via store relationship
+💳 sales.Payment_details
+
+Purpose:
+Customer payment and credit card insights
+
+Key Features:
+
+Joins:
+PersonCreditCard
+CreditCard
+Person + Address
+Includes:
+Card type
+Expiry
+Customer location
+🏷️ sales.Product_Offers
+
+Purpose:
+Product pricing and promotional insights
+
+Key Features:
+
+Combines:
+Product
+Special Offers
+Adds:
+Discount %
+Offer duration
+Quantity conditions
+🧾 sales.Sales_Details
+
+Purpose:
+Core fact-like dataset for sales analytics
+
+Grain:
+➡️ One row per Sales Order Line Item
+
+Includes:
+
+Product hierarchy
+Sales reason classification
+Pricing and totals
+Order lifecycle dates
+
+Enhancements:
+
+Default handling for missing sales reasons
+Combines Header + Detail tables
+🧑‍💼 sales.SalesPerson_Details
+
+Purpose:
+Performance and organizational view of sales staff
+
+Includes:
+
+Sales quotas and performance metrics
+Territory mapping
+Tax rates by region
+Store relationships
+🧠 Key Modeling Decisions
+✔️ Denormalization for Analytics
+
+Instead of:
+
+Many joins at query time
+
+We provide:
+
+Pre-joined, wide datasets
+✔️ Business-Friendly Naming
+Product_Category instead of IDs
+SalesReason instead of codes
+✔️ Separation of Concerns
+Each view serves a clear analytical purpose
+Avoids "one giant table" anti-pattern
+🚀 Benefits
+Faster query development
+Easier Power BI integration
+Reduced SQL complexity for analysts
+Scalable for Gold Layer (KPIs, Aggregations)
+🔮 Next Steps (Gold Layer)
+Build fact/dimension model:
+FactSales
+DimCustomer
+DimProduct
+Add:
+Aggregations
+KPIs (Revenue, Profit, Growth)
+Optimize for reporting tools
+🏁 Conclusion
+
+This Silver layer demonstrates how to:
+
+Transform normalized OLTP schema into analytical datasets
+Apply real-world data engineering practices
+Prepare data for scalable BI solutions
