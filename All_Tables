@@ -1,0 +1,897 @@
+USE [adventureworks_silver]
+GO
+/****** Object:  Table [Audit].[Execution_Log]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [Audit].[Execution_Log](
+	[session_id] [uniqueidentifier] NOT NULL,
+	[execution_id] [uniqueidentifier] NOT NULL,
+	[procedure_name] [nvarchar](100) NOT NULL,
+	[sequence_no] [int] NOT NULL,
+	[start_time] [datetime] NOT NULL,
+	[end_time] [datetime] NULL,
+	[status] [nvarchar](20) NOT NULL,
+	[rows_inserted] [int] NULL,
+	[rows_deleted] [int] NULL,
+	[error_message] [nvarchar](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[execution_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [Audit].[Session_Log]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [Audit].[Session_Log](
+	[session_id] [uniqueidentifier] NOT NULL,
+	[start_time] [datetime] NOT NULL,
+	[end_time] [datetime] NULL,
+	[duration_ms] [int] NULL,
+	[status] [nvarchar](20) NOT NULL,
+	[error_message] [nvarchar](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[session_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_HumanResources_Employee]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_HumanResources_Employee](
+	[BusinessEntityID] [int] NOT NULL,
+	[DepartmentID] [smallint] NULL,
+	[ShiftID] [tinyint] NULL,
+	[Joining_StartDate] [date] NULL,
+	[EndDate] [date] NULL,
+	[LoginID] [nvarchar](256) NOT NULL,
+	[NationalIDNumber] [nvarchar](15) NOT NULL,
+	[OrganizationNode] [hierarchyid] NULL,
+	[OrganizationLevel] [smallint] NULL,
+	[JobTitle] [nvarchar](50) NOT NULL,
+	[BirthDate] [date] NOT NULL,
+	[MaritalStatus] [nchar](1) NOT NULL,
+	[Gender] [nchar](1) NOT NULL,
+	[HireDate] [date] NOT NULL,
+	[VacationHours] [smallint] NOT NULL,
+	[SickLeaveHours] [smallint] NOT NULL,
+	[ShiftName] [nvarchar](50) NULL,
+	[Shift_StartTime] [time](7) NULL,
+	[Shift_EndTime] [time](7) NULL,
+	[Department_Name] [nvarchar](50) NULL,
+	[DepartmentGroupName] [nvarchar](50) NULL,
+	[RateChangeDate] [datetime] NULL,
+	[Rate] [money] NULL,
+	[PayFrequency] [tinyint] NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Person_Person_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Person_Person_Details](
+	[BusinessEntityID] [int] NOT NULL,
+	[PersonID] [int] NULL,
+	[ContactTypeID] [int] NULL,
+	[AddressID] [int] NULL,
+	[TerritoryID] [int] NULL,
+	[AddressTypeID] [int] NULL,
+	[PhoneNumberTypeID] [int] NULL,
+	[EmailAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[BusinessEntity_IDB] [int] NULL,
+	[PersonType] [nchar](2) NOT NULL,
+	[Title] [nvarchar](8) NULL,
+	[FullName] [nvarchar](152) NOT NULL,
+	[EmailPromotion] [int] NOT NULL,
+	[PhoneNumber] [nvarchar](25) NULL,
+	[PhoneName] [nvarchar](50) NULL,
+	[ContactName] [nvarchar](50) NULL,
+	[PasswordHash] [varchar](128) NULL,
+	[PasswordSalt] [varchar](10) NULL,
+	[EmailAddress] [nvarchar](50) NULL,
+	[AddressLine1] [nvarchar](60) NULL,
+	[AddressLine2] [nvarchar](60) NULL,
+	[City] [nvarchar](30) NULL,
+	[PostalCode] [nvarchar](15) NULL,
+	[SpatialLocation] [geography] NULL,
+	[AddressTypeName] [nvarchar](50) NULL,
+	[StateProvinceCode] [nchar](3) NULL,
+	[StateProvinceName] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[CountryRegionName] [nvarchar](50) NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_DocumentView]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_DocumentView](
+	[ProductID] [int] NOT NULL,
+	[DocumentNode] [hierarchyid] NULL,
+	[DocumentLevel] [smallint] NULL,
+	[Title] [nvarchar](50) NULL,
+	[Owner] [int] NULL,
+	[FileName] [nvarchar](400) NULL,
+	[FileExtension] [nvarchar](8) NULL,
+	[Revision] [nchar](5) NULL,
+	[ChangeNumber] [int] NULL,
+	[Status] [tinyint] NULL,
+	[DocumentSummary] [nvarchar](max) NULL,
+	[Document] [varbinary](max) NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_Illustration_XML]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_Illustration_XML](
+	[IllustrationID] [int] IDENTITY(1,1) NOT NULL,
+	[XML_Diagram] [nvarchar](max) NULL,
+	[modifieddate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_Product]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_Product](
+	[ProductID] [int] NOT NULL,
+	[productSubCategoryID] [int] NULL,
+	[ProductCategoryID] [int] NULL,
+	[productPhotoID] [int] NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[ProductNumber] [nvarchar](25) NOT NULL,
+	[MakeFlag] [bit] NOT NULL,
+	[FinishedGoodsFlag] [bit] NOT NULL,
+	[Color] [nvarchar](15) NULL,
+	[SafetyStockLevel] [smallint] NOT NULL,
+	[ReorderPoint] [smallint] NOT NULL,
+	[StandardCost] [money] NOT NULL,
+	[ListPrice] [money] NOT NULL,
+	[Size] [nvarchar](5) NULL,
+	[Size_Unit] [nvarchar](50) NULL,
+	[Weight] [decimal](8, 2) NULL,
+	[Weight_Unite] [nvarchar](50) NULL,
+	[Sub_Category] [nvarchar](50) NULL,
+	[Category] [nvarchar](50) NULL,
+	[Primary] [bit] NULL,
+	[ThumbNailPhoto] [varbinary](max) NULL,
+	[ThumbnailPhotoFileName] [nvarchar](50) NULL,
+	[LargePhoto] [varbinary](max) NULL,
+	[LargePhotoFileName] [nvarchar](50) NULL,
+	[DaysToManufacture] [int] NOT NULL,
+	[ProductLine] [nchar](2) NULL,
+	[Class] [nchar](2) NULL,
+	[Style] [nchar](2) NULL,
+	[SellStartDate] [datetime] NOT NULL,
+	[SellEndDate] [datetime] NULL,
+	[DiscontinuedDate] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_Product_Model_Culture]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_Product_Model_Culture](
+	[ProductID] [int] NOT NULL,
+	[illustrationID] [int] NULL,
+	[productDescriptionID] [int] NULL,
+	[cultureID] [nchar](6) NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[ProductModelID] [int] NULL,
+	[Model_name] [nvarchar](50) NULL,
+	[XML_Diagram] [nvarchar](max) NULL,
+	[Description] [nvarchar](400) NULL,
+	[Culture] [nvarchar](50) NULL,
+	[Discription] [nvarchar](max) NULL,
+	[Instruction] [nvarchar](max) NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_Transaction_History]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_Transaction_History](
+	[ProductID] [int] NOT NULL,
+	[TransactionID] [int] NULL,
+	[ReferenceOrderID] [int] NULL,
+	[ReferenceOrderLineID] [int] NULL,
+	[ProductSubcategoryID] [int] NULL,
+	[ProductModelID] [int] NULL,
+	[ProductName] [nvarchar](50) NOT NULL,
+	[ProductNumber] [nvarchar](25) NOT NULL,
+	[ProductLine] [nchar](2) NULL,
+	[TransactionType] [nchar](1) NULL,
+	[Quantity] [int] NULL,
+	[ActualCost] [money] NULL,
+	[StandardCost] [money] NULL,
+	[ListPrice] [money] NULL,
+	[ProductCost_StartDate] [datetime] NULL,
+	[ProductCost_EndDate] [datetime] NULL,
+	[ProductList_StartDate] [datetime] NULL,
+	[ProductList_EndDate] [datetime] NULL,
+	[TransactionDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Production_Work_operations]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Production_Work_operations](
+	[WorkOrderID] [int] NOT NULL,
+	[ProductID] [int] NOT NULL,
+	[LocationID] [smallint] NULL,
+	[scrapreasonID] [smallint] NULL,
+	[OrderQty] [int] NOT NULL,
+	[StockedQty] [int] NOT NULL,
+	[ScrappedQty] [smallint] NOT NULL,
+	[ScrapReason] [nvarchar](50) NULL,
+	[OperationSequence] [smallint] NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NULL,
+	[DueDate] [datetime] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+	[ScheduledStartDate] [datetime] NULL,
+	[ScheduledEndDate] [datetime] NULL,
+	[ActualStartDate] [datetime] NULL,
+	[ActualEndDate] [datetime] NULL,
+	[ActualResourceHrs] [decimal](9, 4) NULL,
+	[PlannedCost] [money] NULL,
+	[ActualCost] [money] NULL,
+	[md] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Purchasing_Purchase]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Purchasing_Purchase](
+	[PurchaseOrderID] [int] NOT NULL,
+	[PurchaseOrderDetailID] [int] NULL,
+	[EmployeeID] [int] NOT NULL,
+	[VendorID] [int] NOT NULL,
+	[ShipMethodID] [int] NOT NULL,
+	[ProductID] [int] NULL,
+	[RevisionNumber] [tinyint] NOT NULL,
+	[Status] [tinyint] NOT NULL,
+	[OrderDate] [datetime] NOT NULL,
+	[ShipDate] [datetime] NULL,
+	[SubTotal] [money] NOT NULL,
+	[TaxAmt] [money] NOT NULL,
+	[Freight] [money] NOT NULL,
+	[TotalDue] [money] NOT NULL,
+	[DueDate] [datetime] NULL,
+	[OrderQty] [smallint] NULL,
+	[UnitPrice] [money] NULL,
+	[LineTotal] [money] NULL,
+	[ReceivedQty] [decimal](8, 2) NULL,
+	[RejectedQty] [decimal](8, 2) NULL,
+	[StockedQty] [decimal](9, 2) NULL,
+	[ShipName] [nvarchar](50) NULL,
+	[ShipBase] [money] NULL,
+	[ShipRate] [money] NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Purchasing_Vendor]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Purchasing_Vendor](
+	[BusinessEntityID] [int] NOT NULL,
+	[ProductID] [int] NULL,
+	[AccountNumber] [nvarchar](15) NOT NULL,
+	[VendorName] [nvarchar](50) NOT NULL,
+	[AverageLeadTime] [int] NULL,
+	[StandardPrice] [money] NULL,
+	[LastReceiptCost] [money] NULL,
+	[LastReceiptDate] [datetime] NULL,
+	[MinOrderQty] [int] NULL,
+	[MaxOrderQty] [int] NULL,
+	[OnOrderQty] [int] NULL,
+	[CreditRating] [tinyint] NOT NULL,
+	[PreferredVendorStatus] [bit] NOT NULL,
+	[ActiveFlag] [bit] NOT NULL,
+	[PurchasingWebServiceURL] [nvarchar](1024) NULL,
+	[UnitMeasureCode] [nchar](3) NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Sales_Customer_Demographics]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Sales_Customer_Demographics](
+	[CustomerID] [int] NOT NULL,
+	[personid] [int] NULL,
+	[BuinessEntityAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[territoryID] [int] NULL,
+	[storeID] [int] NULL,
+	[Person_name] [nvarchar](193) NULL,
+	[City] [nvarchar](30) NULL,
+	[PostalCode] [nvarchar](15) NULL,
+	[StateName] [nvarchar](50) NULL,
+	[CountryName] [nvarchar](50) NULL,
+	[TerritoryName] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[Group] [nvarchar](50) NULL,
+	[AccountNumber] [varchar](10) NOT NULL,
+	[Store_name] [nvarchar](50) NULL,
+	[SalesPersonID] [int] NULL,
+	[Sales_Person] [nvarchar](193) NULL,
+	[Store_Modified_date] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Sales_Payment_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Sales_Payment_Details](
+	[Personid] [int] NOT NULL,
+	[creditCardID] [int] NULL,
+	[businessEntityAddressID] [int] NULL,
+	[addressID] [int] NULL,
+	[stateProvinceID] [int] NULL,
+	[PersonType] [nchar](2) NOT NULL,
+	[Person_name] [nvarchar](193) NOT NULL,
+	[City] [nvarchar](30) NULL,
+	[StateName] [nvarchar](50) NULL,
+	[CountryName] [nvarchar](50) NULL,
+	[CardType] [nvarchar](50) NULL,
+	[CardNumber] [nvarchar](25) NULL,
+	[ExpMonth] [tinyint] NULL,
+	[ExpYear] [smallint] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Sales_Product_Offers]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Sales_Product_Offers](
+	[ProductID] [int] NOT NULL,
+	[SpecialOfferID] [int] NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[StandardCost] [money] NOT NULL,
+	[ListPrice] [money] NOT NULL,
+	[DiscountPct] [smallmoney] NULL,
+	[Description] [nvarchar](255) NULL,
+	[MinQty] [int] NULL,
+	[MaxQty] [int] NULL,
+	[Type] [nvarchar](50) NULL,
+	[Category] [nvarchar](50) NULL,
+	[StartDate] [datetime] NULL,
+	[EndDate] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Sales_Sales_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Sales_Sales_Details](
+	[SalesOrderID] [int] NOT NULL,
+	[productsubcategoryID] [int] NULL,
+	[productcategoryID] [int] NULL,
+	[SalesReasonID] [int] NULL,
+	[ProductID] [int] NOT NULL,
+	[CarrierTrackingNumber] [nvarchar](25) NULL,
+	[OrderQty] [smallint] NOT NULL,
+	[UnitPrice] [money] NOT NULL,
+	[UnitPriceDiscount] [money] NOT NULL,
+	[LineTotal] [numeric](38, 6) NOT NULL,
+	[Product_Name] [nvarchar](50) NULL,
+	[Product_SubCategory] [nvarchar](50) NULL,
+	[Product_Category] [nvarchar](50) NULL,
+	[SalesReason] [nvarchar](50) NULL,
+	[ReasonType] [nvarchar](50) NULL,
+	[RevisionNumber] [tinyint] NOT NULL,
+	[OrderDate] [datetime] NOT NULL,
+	[DueDate] [datetime] NOT NULL,
+	[ShipDate] [datetime] NULL,
+	[Status] [tinyint] NOT NULL,
+	[OnlineOrderFlag] [bit] NOT NULL,
+	[SalesOrderNumber] [nvarchar](25) NOT NULL,
+	[PurchaseOrderNumber] [nvarchar](25) NULL,
+	[AccountNumber] [nvarchar](15) NULL,
+	[CreditCardApprovalCode] [varchar](15) NULL,
+	[SubTotal] [money] NOT NULL,
+	[TaxAmt] [money] NOT NULL,
+	[Freight] [money] NOT NULL,
+	[TotalDue] [money] NOT NULL,
+	[Comment] [nvarchar](128) NULL,
+	[salesorder_details_rowguid] [uniqueidentifier] NOT NULL,
+	[salesorder_header_rowguid] [uniqueidentifier] NOT NULL,
+	[salesorder_header_modified_date] [datetime] NOT NULL,
+	[salesorder_details_modified_date] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Input_Sales_SalesPerson_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Input_Sales_SalesPerson_Details](
+	[SalesPersonid] [int] NOT NULL,
+	[personid] [int] NULL,
+	[BuinessEntityAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[territoryID] [int] NULL,
+	[SalesPerson] [nvarchar](167) NULL,
+	[Storename] [nvarchar](50) NULL,
+	[Territory] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[SalesQuota] [money] NULL,
+	[Bonus] [money] NOT NULL,
+	[CommissionPct] [smallmoney] NOT NULL,
+	[SalesYTD] [money] NOT NULL,
+	[SalesLastYear] [money] NOT NULL,
+	[TaxRate] [smallmoney] NULL,
+	[Tax_name] [nvarchar](50) NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_HumanResources_Employee]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_HumanResources_Employee](
+	[BusinessEntityID] [int] NOT NULL,
+	[DepartmentID] [smallint] NULL,
+	[ShiftID] [tinyint] NULL,
+	[Joining_StartDate] [date] NULL,
+	[EndDate] [date] NULL,
+	[LoginID] [nvarchar](256) NOT NULL,
+	[NationalIDNumber] [nvarchar](15) NOT NULL,
+	[OrganizationNode] [hierarchyid] NULL,
+	[OrganizationLevel] [smallint] NULL,
+	[JobTitle] [nvarchar](50) NOT NULL,
+	[BirthDate] [date] NOT NULL,
+	[MaritalStatus] [nchar](1) NOT NULL,
+	[Gender] [nchar](1) NOT NULL,
+	[HireDate] [date] NOT NULL,
+	[VacationHours] [smallint] NOT NULL,
+	[SickLeaveHours] [smallint] NOT NULL,
+	[ShiftName] [nvarchar](50) NULL,
+	[Shift_StartTime] [time](7) NULL,
+	[Shift_EndTime] [time](7) NULL,
+	[Department_Name] [nvarchar](50) NULL,
+	[DepartmentGroupName] [nvarchar](50) NULL,
+	[RateChangeDate] [datetime] NULL,
+	[Rate] [money] NULL,
+	[PayFrequency] [tinyint] NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Person_Person_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Person_Person_Details](
+	[BusinessEntityID] [int] NOT NULL,
+	[PersonID] [int] NULL,
+	[ContactTypeID] [int] NULL,
+	[AddressID] [int] NULL,
+	[TerritoryID] [int] NULL,
+	[AddressTypeID] [int] NULL,
+	[PhoneNumberTypeID] [int] NULL,
+	[EmailAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[BusinessEntity_IDB] [int] NULL,
+	[PersonType] [nchar](2) NOT NULL,
+	[Title] [nvarchar](8) NULL,
+	[FullName] [nvarchar](152) NOT NULL,
+	[EmailPromotion] [int] NOT NULL,
+	[PhoneNumber] [nvarchar](25) NULL,
+	[PhoneName] [nvarchar](50) NULL,
+	[ContactName] [nvarchar](50) NULL,
+	[PasswordHash] [varchar](128) NULL,
+	[PasswordSalt] [varchar](10) NULL,
+	[EmailAddress] [nvarchar](50) NULL,
+	[AddressLine1] [nvarchar](60) NULL,
+	[AddressLine2] [nvarchar](60) NULL,
+	[City] [nvarchar](30) NULL,
+	[PostalCode] [nvarchar](15) NULL,
+	[SpatialLocation] [geography] NULL,
+	[AddressTypeName] [nvarchar](50) NULL,
+	[StateProvinceCode] [nchar](3) NULL,
+	[StateProvinceName] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[CountryRegionName] [nvarchar](50) NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_DocumentView]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_DocumentView](
+	[ProductID] [int] NOT NULL,
+	[DocumentNode] [hierarchyid] NULL,
+	[DocumentLevel] [smallint] NULL,
+	[Title] [nvarchar](50) NULL,
+	[Owner] [int] NULL,
+	[FileName] [nvarchar](400) NULL,
+	[FileExtension] [nvarchar](8) NULL,
+	[Revision] [nchar](5) NULL,
+	[ChangeNumber] [int] NULL,
+	[Status] [tinyint] NULL,
+	[DocumentSummary] [nvarchar](max) NULL,
+	[Document] [varbinary](max) NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_Illustration_XML]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_Illustration_XML](
+	[IllustrationID] [int] IDENTITY(1,1) NOT NULL,
+	[XML_Diagram] [nvarchar](max) NULL,
+	[modifieddate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_Product]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_Product](
+	[ProductID] [int] NOT NULL,
+	[productSubCategoryID] [int] NULL,
+	[ProductCategoryID] [int] NULL,
+	[productPhotoID] [int] NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[ProductNumber] [nvarchar](25) NOT NULL,
+	[MakeFlag] [bit] NOT NULL,
+	[FinishedGoodsFlag] [bit] NOT NULL,
+	[Color] [nvarchar](15) NULL,
+	[SafetyStockLevel] [smallint] NOT NULL,
+	[ReorderPoint] [smallint] NOT NULL,
+	[StandardCost] [money] NOT NULL,
+	[ListPrice] [money] NOT NULL,
+	[Size] [nvarchar](5) NULL,
+	[Size_Unit] [nvarchar](50) NULL,
+	[Weight] [decimal](8, 2) NULL,
+	[Weight_Unite] [nvarchar](50) NULL,
+	[Sub_Category] [nvarchar](50) NULL,
+	[Category] [nvarchar](50) NULL,
+	[Primary] [bit] NULL,
+	[ThumbNailPhoto] [varbinary](max) NULL,
+	[ThumbnailPhotoFileName] [nvarchar](50) NULL,
+	[LargePhoto] [varbinary](max) NULL,
+	[LargePhotoFileName] [nvarchar](50) NULL,
+	[DaysToManufacture] [int] NOT NULL,
+	[ProductLine] [nchar](2) NULL,
+	[Class] [nchar](2) NULL,
+	[Style] [nchar](2) NULL,
+	[SellStartDate] [datetime] NOT NULL,
+	[SellEndDate] [datetime] NULL,
+	[DiscontinuedDate] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_Product_Model_Culture]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_Product_Model_Culture](
+	[ProductID] [int] NOT NULL,
+	[illustrationID] [int] NULL,
+	[productDescriptionID] [int] NULL,
+	[cultureID] [nchar](6) NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[ProductModelID] [int] NULL,
+	[Model_name] [nvarchar](50) NULL,
+	[XML_Diagram] [nvarchar](max) NULL,
+	[Description] [nvarchar](400) NULL,
+	[Culture] [nvarchar](50) NULL,
+	[Discription] [nvarchar](max) NULL,
+	[Instruction] [nvarchar](max) NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_Transaction_History]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_Transaction_History](
+	[ProductID] [int] NOT NULL,
+	[TransactionID] [int] NULL,
+	[ReferenceOrderID] [int] NULL,
+	[ReferenceOrderLineID] [int] NULL,
+	[ProductSubcategoryID] [int] NULL,
+	[ProductModelID] [int] NULL,
+	[ProductName] [nvarchar](50) NOT NULL,
+	[ProductNumber] [nvarchar](25) NOT NULL,
+	[ProductLine] [nchar](2) NULL,
+	[TransactionType] [nchar](1) NULL,
+	[Quantity] [int] NULL,
+	[ActualCost] [money] NULL,
+	[StandardCost] [money] NULL,
+	[ListPrice] [money] NULL,
+	[ProductCost_StartDate] [datetime] NULL,
+	[ProductCost_EndDate] [datetime] NULL,
+	[ProductList_StartDate] [datetime] NULL,
+	[ProductList_EndDate] [datetime] NULL,
+	[TransactionDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Production_Work_operations]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Production_Work_operations](
+	[WorkOrderID] [int] NOT NULL,
+	[ProductID] [int] NOT NULL,
+	[LocationID] [smallint] NULL,
+	[scrapreasonID] [smallint] NULL,
+	[OrderQty] [int] NOT NULL,
+	[StockedQty] [int] NOT NULL,
+	[ScrappedQty] [smallint] NOT NULL,
+	[ScrapReason] [nvarchar](50) NULL,
+	[OperationSequence] [smallint] NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NULL,
+	[DueDate] [datetime] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL,
+	[ScheduledStartDate] [datetime] NULL,
+	[ScheduledEndDate] [datetime] NULL,
+	[ActualStartDate] [datetime] NULL,
+	[ActualEndDate] [datetime] NULL,
+	[ActualResourceHrs] [decimal](9, 4) NULL,
+	[PlannedCost] [money] NULL,
+	[ActualCost] [money] NULL,
+	[md] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Purchasing_Purchase]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Purchasing_Purchase](
+	[PurchaseOrderID] [int] NOT NULL,
+	[PurchaseOrderDetailID] [int] NULL,
+	[EmployeeID] [int] NOT NULL,
+	[VendorID] [int] NOT NULL,
+	[ShipMethodID] [int] NOT NULL,
+	[ProductID] [int] NULL,
+	[RevisionNumber] [tinyint] NOT NULL,
+	[Status] [tinyint] NOT NULL,
+	[OrderDate] [datetime] NOT NULL,
+	[ShipDate] [datetime] NULL,
+	[SubTotal] [money] NOT NULL,
+	[TaxAmt] [money] NOT NULL,
+	[Freight] [money] NOT NULL,
+	[TotalDue] [money] NOT NULL,
+	[DueDate] [datetime] NULL,
+	[OrderQty] [smallint] NULL,
+	[UnitPrice] [money] NULL,
+	[LineTotal] [money] NULL,
+	[ReceivedQty] [decimal](8, 2) NULL,
+	[RejectedQty] [decimal](8, 2) NULL,
+	[StockedQty] [decimal](9, 2) NULL,
+	[ShipName] [nvarchar](50) NULL,
+	[ShipBase] [money] NULL,
+	[ShipRate] [money] NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Purchasing_Vendor]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Purchasing_Vendor](
+	[BusinessEntityID] [int] NOT NULL,
+	[ProductID] [int] NULL,
+	[AccountNumber] [nvarchar](15) NOT NULL,
+	[VendorName] [nvarchar](50) NOT NULL,
+	[AverageLeadTime] [int] NULL,
+	[StandardPrice] [money] NULL,
+	[LastReceiptCost] [money] NULL,
+	[LastReceiptDate] [datetime] NULL,
+	[MinOrderQty] [int] NULL,
+	[MaxOrderQty] [int] NULL,
+	[OnOrderQty] [int] NULL,
+	[CreditRating] [tinyint] NOT NULL,
+	[PreferredVendorStatus] [bit] NOT NULL,
+	[ActiveFlag] [bit] NOT NULL,
+	[PurchasingWebServiceURL] [nvarchar](1024) NULL,
+	[UnitMeasureCode] [nchar](3) NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Sales_Customer_Demographics]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Sales_Customer_Demographics](
+	[CustomerID] [int] NOT NULL,
+	[personid] [int] NULL,
+	[BuinessEntityAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[territoryID] [int] NULL,
+	[storeID] [int] NULL,
+	[Person_name] [nvarchar](193) NULL,
+	[City] [nvarchar](30) NULL,
+	[PostalCode] [nvarchar](15) NULL,
+	[StateName] [nvarchar](50) NULL,
+	[CountryName] [nvarchar](50) NULL,
+	[TerritoryName] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[Group] [nvarchar](50) NULL,
+	[AccountNumber] [varchar](10) NOT NULL,
+	[Store_name] [nvarchar](50) NULL,
+	[SalesPersonID] [int] NULL,
+	[Sales_Person] [nvarchar](193) NULL,
+	[Store_Modified_date] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NOT NULL,
+	[ModifiedDate] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Sales_Payment_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Sales_Payment_Details](
+	[Personid] [int] NOT NULL,
+	[creditCardID] [int] NULL,
+	[businessEntityAddressID] [int] NULL,
+	[addressID] [int] NULL,
+	[stateProvinceID] [int] NULL,
+	[PersonType] [nchar](2) NOT NULL,
+	[Person_name] [nvarchar](193) NOT NULL,
+	[City] [nvarchar](30) NULL,
+	[StateName] [nvarchar](50) NULL,
+	[CountryName] [nvarchar](50) NULL,
+	[CardType] [nvarchar](50) NULL,
+	[CardNumber] [nvarchar](25) NULL,
+	[ExpMonth] [tinyint] NULL,
+	[ExpYear] [smallint] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Sales_Product_Offers]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Sales_Product_Offers](
+	[ProductID] [int] NOT NULL,
+	[SpecialOfferID] [int] NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[StandardCost] [money] NOT NULL,
+	[ListPrice] [money] NOT NULL,
+	[DiscountPct] [smallmoney] NULL,
+	[Description] [nvarchar](255) NULL,
+	[MinQty] [int] NULL,
+	[MaxQty] [int] NULL,
+	[Type] [nvarchar](50) NULL,
+	[Category] [nvarchar](50) NULL,
+	[StartDate] [datetime] NULL,
+	[EndDate] [datetime] NULL,
+	[rowguid] [uniqueidentifier] NULL,
+	[ModifiedDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Sales_Sales_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Sales_Sales_Details](
+	[SalesOrderID] [int] NOT NULL,
+	[productsubcategoryID] [int] NULL,
+	[productcategoryID] [int] NULL,
+	[SalesReasonID] [int] NULL,
+	[ProductID] [int] NOT NULL,
+	[CarrierTrackingNumber] [nvarchar](25) NULL,
+	[OrderQty] [smallint] NOT NULL,
+	[UnitPrice] [money] NOT NULL,
+	[UnitPriceDiscount] [money] NOT NULL,
+	[LineTotal] [numeric](38, 6) NOT NULL,
+	[Product_Name] [nvarchar](50) NULL,
+	[Product_SubCategory] [nvarchar](50) NULL,
+	[Product_Category] [nvarchar](50) NULL,
+	[SalesReason] [nvarchar](50) NULL,
+	[ReasonType] [nvarchar](50) NULL,
+	[RevisionNumber] [tinyint] NOT NULL,
+	[OrderDate] [datetime] NOT NULL,
+	[DueDate] [datetime] NOT NULL,
+	[ShipDate] [datetime] NULL,
+	[Status] [tinyint] NOT NULL,
+	[OnlineOrderFlag] [bit] NOT NULL,
+	[SalesOrderNumber] [nvarchar](25) NOT NULL,
+	[PurchaseOrderNumber] [nvarchar](25) NULL,
+	[AccountNumber] [nvarchar](15) NULL,
+	[CreditCardApprovalCode] [varchar](15) NULL,
+	[SubTotal] [money] NOT NULL,
+	[TaxAmt] [money] NOT NULL,
+	[Freight] [money] NOT NULL,
+	[TotalDue] [money] NOT NULL,
+	[Comment] [nvarchar](128) NULL,
+	[salesorder_details_rowguid] [uniqueidentifier] NOT NULL,
+	[salesorder_header_rowguid] [uniqueidentifier] NOT NULL,
+	[salesorder_header_modified_date] [datetime] NOT NULL,
+	[salesorder_details_modified_date] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Output_Sales_SalesPerson_Details]    Script Date: 5/1/2026 7:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Output_Sales_SalesPerson_Details](
+	[SalesPersonid] [int] NOT NULL,
+	[personid] [int] NULL,
+	[BuinessEntityAddressID] [int] NULL,
+	[StateProvinceID] [int] NULL,
+	[territoryID] [int] NULL,
+	[SalesPerson] [nvarchar](167) NULL,
+	[Storename] [nvarchar](50) NULL,
+	[Territory] [nvarchar](50) NULL,
+	[CountryRegionCode] [nvarchar](3) NULL,
+	[SalesQuota] [money] NULL,
+	[Bonus] [money] NOT NULL,
+	[CommissionPct] [smallmoney] NOT NULL,
+	[SalesYTD] [money] NOT NULL,
+	[SalesLastYear] [money] NOT NULL,
+	[TaxRate] [smallmoney] NULL,
+	[Tax_name] [nvarchar](50) NULL
+) ON [PRIMARY]
+GO
+ALTER TABLE [Audit].[Execution_Log] ADD  DEFAULT (getdate()) FOR [start_time]
+GO
+ALTER TABLE [Audit].[Execution_Log]  WITH CHECK ADD FOREIGN KEY([session_id])
+REFERENCES [Audit].[Session_Log] ([session_id])
+GO
