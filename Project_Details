@@ -1,0 +1,74 @@
+🔄 Data Pipeline Design
+This project is designed as a modular data pipeline, simulating how enterprise ETL systems operate.
+
+🧩 Pipeline Stages
+1️⃣ Data Extraction (Source Layer)
+Data is sourced from curated domain-specific views:
+sales.*
+production.*
+Purchasing.*
+HumanResources.*
+Person.*
+Views act as a controlled abstraction layer over raw data
+
+2️⃣ Staging Layer (Input Tables)
+Data is loaded into Input_* tables
+Purpose:
+Isolate source changes
+Enable reprocessing
+Provide checkpointing
+
+3️⃣ Transformation & Load (Output Tables)
+Business logic applied inside child stored procedures
+Data is written into Output_* tables
+Current strategy:
+Delete + Insert (idempotent load pattern)
+
+4️⃣ Orchestration Layer
+A Main Stored Procedure controls execution flow:
+Executes child SPs sequentially
+Maintains execution order using sequence_no
+Handles success/failure tracking
+
+5️⃣ Monitoring & Logging Layer
+Ensures full pipeline observability
+
+Session Level (Session_Log)
+
+Tracks full pipeline run
+
+Execution Level (Execution_Log)
+
+Tracks each step:
+Start time
+End time
+Rows processed
+Status
+Errors
+
+🔁 Pipeline Characteristics
+
+✔️ Modular – Each dataset is independently processed
+✔️ Scalable – Easy to add new domains or SPs
+✔️ Traceable – Full audit trail available
+✔️ Restartable – Can rerun failed steps without affecting others
+✔️ Deterministic – Same input produces same output
+
+⚙️ Pipeline Execution Flow
+Start Session
+   ↓
+Execute Child SP (Step 1)
+   ↓
+Log Execution
+   ↓
+Execute Child SP (Step N)
+   ↓
+End Session
+🚀 Future Pipeline Enhancements
+Add parallel execution for independent SPs
+Introduce incremental loads (CDC)
+Integrate with orchestration tools (ADF / Airflow)
+Add data quality validation stage
+Implement retry mechanism for failed steps
+
+This pipeline design closely reflects real-world enterprise ETL systems, focusing on reliability, observability, and maintainability.
