@@ -1,177 +1,97 @@
-🧱 AdventureWorks Data Warehouse – Silver Layer (Sales Schema)
-📌 Overview
+🚀 Silver Layer Data Pipeline (Phase I)
+(Phase II......)
 
-This project implements the Silver Layer transformation of the AdventureWorks dataset, focusing on the Sales domain.
+This project is designed to simulate how data actually flows inside a real-world data engineering environment.
+Most data projects focus on writing queries or building a few dashboards.
 
-The goal of the Silver layer is to:
+Instead of treating SQL as just a querying tool, this implementation builds a structured, modular, and fully traceable data pipeline, closely resembling production-grade ETL systems.
 
-Clean and standardize Bronze/raw data
-Combine normalized tables into analysis-friendly entities
-Reduce join complexity for downstream users
-Prepare structured datasets for Gold layer (BI / Power BI dashboards)
+At its core, this project implements a Silver Layer architecture using the AdventureWorks dataset.
 
-🏗️ Architecture
+The goal is to transform raw, domain-level data into a clean, structured, and analysis-ready format while maintaining full control over execution, monitoring, and data movement.
 
-🔹 Bronze Layer (Source)
-Raw tables from adventureworks2019
-Highly normalized
-Not optimized for analytics
+The design emphasizes not just transformation, but also:
 
-🔹 Silver Layer (This Implementation)
-Created in: adventureworks_silver
-Schema used: sales, production
-Uses SQL Views to:
-Flatten relationships
-Add business context
-Handle nulls and defaults
-Improve readability
+Observability
+Reliability
+Scalability
 
-🎯 Design Principles
-1. Domain-Based Modeling
+The pipeline begins with domain-specific views across multiple business areas such as:
 
-Instead of keeping tables fragmented, data is grouped into business entities:
-
-Customer
 Sales
-Product
-Payment
-Salesperson
+Production
+Purchasing
+Human Resources
+Person
 
-2. View-Based Transformation
-No physical duplication of data
-Views act as logical data models
-Ensures:
-Maintainability
-Real-time reflection of source updates
+These views act as a controlled abstraction layer, ensuring that the upstream data remains decoupled from transformation logic.
 
-3. Data Enrichment
+From there, data flows into Input (staging) tables, which serve as an intermediate checkpoint.
 
-Multiple tables are combined to provide:
+This staging layer allows:
 
-Full names (concat_ws)
-Geographic hierarchy (City → State → Country)
-Product categorization
-Sales reasons and metadata
-4. Null Handling & Defaults
-COALESCE() used for missing values
-Default labels like 'Other' for unknown categories
-5. Reusable CTEs
+Safe reprocessing
+Easier debugging
+Data validation
+Isolation from source systems
 
-Common patterns extracted using CTEs:
+Once staged, the data is processed through modular stored procedures, each dedicated to a specific dataset.
 
-PersonAddress
-PersonDetails
-product_detail
-sales_reason
-📊 Implemented Views
-🧑‍💼 sales.Customer_Demographics
+These procedures:
 
-Purpose:
-Unified customer profile including:
+Handle transformations
+Load data into Output tables
+Track operational metrics
 
-Personal details
-Address & geography
-Store association
-Sales territory
+The processed data is then stored in Output tables, which represent the final Silver Layer.
 
-Key Transformations:
+The current implementation follows an idempotent Delete + Insert pattern, ensuring consistent and repeatable results across executions.
 
-Combines Customer, Person, Store, Territory
-Resolves both individual customers and store customers
-Maps SalesPerson via store relationship
-💳 sales.Payment_details
+Each procedure also captures:
 
-Purpose:
-Customer payment and credit card insights
+Rows inserted
+Rows deleted
 
-Key Features:
+This provides transparency into how data changes during each run.
 
-Joins:
-PersonCreditCard
-CreditCard
-Person + Address
-Includes:
-Card type
-Expiry
-Customer location
-🏷️ sales.Product_Offers
+A key highlight of this project is the orchestration and logging framework.
 
-Purpose:
-Product pricing and promotional insights
+A main stored procedure controls the execution flow by triggering all child procedures in a defined sequence.
 
-Key Features:
+At the same time, a structured logging system captures both session-level and execution-level details, including:
 
-Combines:
-Product
-Special Offers
-Adds:
-Discount %
-Offer duration
-Quantity conditions
-🧾 sales.Sales_Details
+Start time
+End time
+Execution status
+Row counts
+Error messages
 
-Purpose:
-Core fact-like dataset for sales analytics
+This creates a complete audit trail, making it easier to monitor runs and debug failures — similar to real production environments.
 
-Grain:
-➡️ One row per Sales Order Line Item
+What makes this project stand out is its focus on pipeline thinking rather than isolated transformations.
 
-Includes:
+It is designed to be:
 
-Product hierarchy
-Sales reason classification
-Pricing and totals
-Order lifecycle dates
+Modular
+Restartable
+Traceable
 
-Enhancements:
+This allows individual components to be tested, rerun, or extended independently.
 
-Default handling for missing sales reasons
-Combines Header + Detail tables
-🧑‍💼 sales.SalesPerson_Details
+This is Phase I of the project, focused on building a strong foundation for structured data pipelines.
 
-Purpose:
-Performance and organizational view of sales staff
+Future enhancements may include:
 
-Includes:
+Incremental loading (CDC)
+MERGE-based transformations
+Parallel execution
+Integration with tools like ADF or Airflow
+Data quality checks
 
-Sales quotas and performance metrics
-Territory mapping
-Tax rates by region
-Store relationships
-🧠 Key Modeling Decisions
-✔️ Denormalization for Analytics
+If you're exploring data engineering beyond basic SQL, this project is a practical example of how to think in terms of:
 
-Instead of:
+👉 Systems
+👉 Pipelines
+👉 Production-ready design
 
-Many joins at query time
-
-We provide:
-
-Pre-joined, wide datasets
-✔️ Business-Friendly Naming
-Product_Category instead of IDs
-SalesReason instead of codes
-✔️ Separation of Concerns
-Each view serves a clear analytical purpose
-Avoids "one giant table" anti-pattern
-🚀 Benefits
-Faster query development
-Easier Power BI integration
-Reduced SQL complexity for analysts
-Scalable for Gold Layer (KPIs, Aggregations)
-🔮 Next Steps (Gold Layer)
-Build fact/dimension model:
-FactSales
-DimCustomer
-DimProduct
-Add:
-Aggregations
-KPIs (Revenue, Profit, Growth)
-Optimize for reporting tools
-🏁 Conclusion
-
-This Silver layer demonstrates how to:
-
-Transform normalized OLTP schema into analytical datasets
-Apply real-world data engineering practices
-Prepare data for scalable BI solutions
+instead of just queries.
