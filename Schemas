@@ -1,0 +1,23 @@
+USE [adventureworks_silver]
+GO
+/****** Object:  Schema [Audit]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [Audit]
+GO
+/****** Object:  Schema [HUMAN_RESOURCE]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [HUMAN_RESOURCE]
+GO
+/****** Object:  Schema [HumanResources]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [HumanResources]
+GO
+/****** Object:  Schema [Person]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [Person]
+GO
+/****** Object:  Schema [production]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [production]
+GO
+/****** Object:  Schema [Purchasing]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [Purchasing]
+GO
+/****** Object:  Schema [sales]    Script Date: 5/1/2026 7:37:35 PM ******/
+CREATE SCHEMA [sales]
+GO
