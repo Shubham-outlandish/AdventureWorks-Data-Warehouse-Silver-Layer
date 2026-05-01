@@ -1,0 +1,719 @@
+USE [adventureworks_silver]
+GO
+/****** Object:  View [dbo].[LoadMaster_Preview]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+   CREATE VIEW [dbo].[LoadMaster_Preview]
+   as
+(
+   select
+        s.session_id
+       ,e.execution_id
+       ,e.procedure_name
+       ,e.sequence_no
+       ,e.start_time
+       ,e.end_time
+       ,datediff(MILLISECOND,e.start_time,e.end_time) as duration_ms
+       ,e.status
+       ,e.rows_inserted
+       ,e.rows_deleted
+       ,e.error_message
+   From [audit].[Session_Log] s
+   join [audit].[Execution_Log] e
+   on s.session_id=e.session_id
+   )
+GO
+/****** Object:  View [HumanResources].[Employee]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [HumanResources].[Employee] as 
+select 
+-- Taking from employees
+e.[BusinessEntityID],
+edh.[DepartmentID],
+edh.[ShiftID],
+
+--taking From Empoyees department history
+edh.[StartDate] as [Joining_StartDate],
+edh.[EndDate],
+e.[LoginID],
+e.[NationalIDNumber],
+e.[OrganizationNode],
+e.[OrganizationLevel],
+e.[JobTitle],
+e.[BirthDate],
+e.[MaritalStatus],
+e.[Gender],
+e.[HireDate],
+e.[VacationHours],
+e.[SickLeaveHours],
+
+-- taking from shift
+sh.[Name] as [ShiftName],
+sh.[StartTime] as [Shift_StartTime],
+sh.[EndTime] as [Shift_EndTime],
+
+ --taking from Department
+d.[Name] as [Department_Name],
+d.[GroupName]  as [DepartmentGroupName],
+ 
+ --taking from Employees pay history
+eph.[RateChangeDate],
+eph.[Rate],
+eph.[PayFrequency],
+e.[ModifiedDate]
+from [AdventureWorks2019].[HumanResources].[Employee] e
+left join [AdventureWorks2019].[HumanResources].[EmployeeDepartmentHistory]edh
+on e.BusinessEntityID = edh.BusinessEntityID
+left join [AdventureWorks2019].[HumanResources].[Department]d
+on edh.DepartmentID = d.DepartmentID
+left join [AdventureWorks2019].[HumanResources].[Shift]sh
+on edh.ShiftID = sh.ShiftID 
+left join [AdventureWorks2019].[HumanResources].[EmployeePayHistory]eph
+on e.BusinessEntityID = eph.BusinessEntityID;
+GO
+/****** Object:  View [Person].[Person_Details]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ CREATE VIEW [Person].[Person_Details] as 
+ SELECT 
+ p.[BusinessEntityID],
+ bec.[PersonID],
+ bec.[ContactTypeID],
+ bea.[AddressID],
+ sp.[TerritoryID],
+ bea.[AddressTypeID],
+ pp.[PhoneNumberTypeID],
+ ea.[EmailAddressID],
+ ad.[StateProvinceID],
+ be.[BusinessEntityID] as [BusinessEntity_IDB],
+ p.[PersonType],
+ p.[Title],
+ ISNULL(p.FirstName,'')+ ' ' + ISNULL(p.MiddleName +' ','')+ ISNULL(p.LastName,'') as FullName,
+ p.[EmailPromotion],
+ pp.[PhoneNumber],
+ pnt.[Name] as [PhoneName],
+ ct.[Name] as [ContactName],
+ pass.[PasswordHash],
+ pass.[PasswordSalt],
+ ea.[EmailAddress],
+ ad.[AddressLine1],
+ ad.[AddressLine2],
+ ad.[City],
+ ad.[PostalCode],
+ ad.[SpatialLocation],
+ adt.[Name] as [AddressTypeName],
+ sp.[StateProvinceCode],
+ sp.[Name] as [StateProvinceName],
+ sp.[CountryRegionCode],
+ cr.[Name] as [CountryRegionName],
+ p.[rowguid],
+ p.[ModifiedDate]
+ FROM [AdventureWorks2019].[Person].[Person]p
+ left join [AdventureWorks2019].[Person].[BusinessEntityContact] bec 
+ on p.BusinessEntityID = bec.PersonID
+ left join[AdventureWorks2019].[Person].[ContactType]ct
+ on bec.ContactTypeID = ct.ContactTypeID
+ left join [AdventureWorks2019].[Person].[BusinessEntity] be
+ on p.BusinessEntityID = be.BusinessEntityID 
+ left join [AdventureWorks2019].[Person].[BusinessEntityAddress] bea
+ on be.BusinessEntityID = bea.BusinessEntityID 
+ left join [AdventureWorks2019].[Person].[AddressType] adt
+ on bea.AddressTypeID = adt.AddressTypeID
+ left join [AdventureWorks2019].[Person].[Address] ad
+ on bea.AddressID = ad.AddressID
+ left join [AdventureWorks2019].[Person].[Password] pass
+ on p.BusinessEntityID = pass.BusinessEntityID 
+ left join [AdventureWorks2019].[Person].[EmailAddress]ea
+ on p.BusinessEntityID = ea.BusinessEntityID 
+ left join [AdventureWorks2019].[Person].[PersonPhone]pp
+ on p.BusinessEntityID = pp.BusinessEntityID
+ left join [AdventureWorks2019].[Person].[PhoneNumberType]pnt
+ on pp.PhoneNumberTypeID = pnt.PhoneNumberTypeID
+ left join [AdventureWorks2019].[Person].[StateProvince] sp
+ on ad.StateProvinceID = sp.StateProvinceID
+ left join [AdventureWorks2019].[Person].[CountryRegion] cr
+ on sp.CountryRegionCode = cr.CountryRegionCode;
+
+GO
+/****** Object:  View [production].[DocumentView]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ CREATE VIEW [production].[DocumentView] as 
+ Select 
+       pd.[ProductID],
+       d.[DocumentNode],
+       d.[DocumentLevel],
+       d.[Title],
+       d.[Owner],
+       d.[FileName],
+       d.[FileExtension],
+       d.[Revision],
+       d.[ChangeNumber],
+       d.[Status],
+       d.[DocumentSummary],
+       d.[Document],
+       d.[rowguid],
+       d.[ModifiedDate]
+  From [AdventureWorks2019].[Production].[ProductDocument]pd
+  left join [AdventureWorks2019].[Production].[Document] d
+  on pd.DocumentNode = d.DocumentNode;
+GO
+/****** Object:  View [production].[Illustration_XML]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+  Create View [production].[Illustration_XML] as
+  select 
+        IllustrationID
+       ,Cast(diagram as nvarchar(max)) as XML_Diagram
+       ,modifieddate
+  from [adventureworks2019].[Production].Illustration
+GO
+/****** Object:  View [production].[Product]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE view [production].[Product] as 
+select p.[ProductID]
+      ,psc.productSubCategoryID
+      ,pc.ProductCategoryID
+      ,pp.productPhotoID
+      ,p.[Name]
+      ,p.[ProductNumber]
+      ,p.[MakeFlag]
+      ,p.[FinishedGoodsFlag]
+      ,p.[Color]
+      ,p.[SafetyStockLevel]
+      ,p.[ReorderPoint]
+      ,p.[StandardCost]
+      ,p.[ListPrice]
+      ,p.[Size]
+      ,Size_um.[name] as Size_Unit
+      ,p.[Weight]
+      ,Weight_um.[name] as Weight_Unite
+      ,psc.Name as Sub_Category
+      ,pc.Name as Category
+      ,ppp.[Primary]
+      ,pp.[ThumbNailPhoto]
+      ,pp.[ThumbnailPhotoFileName]
+      ,pp.[LargePhoto]
+      ,pp.[LargePhotoFileName]
+      ,p.[DaysToManufacture]
+      ,p.[ProductLine]
+      ,p.[Class]
+      ,p.[Style]
+      ,p.[SellStartDate]
+      ,p.[SellEndDate]
+      ,p.[DiscontinuedDate]
+      ,p.[rowguid]
+      ,p.[ModifiedDate]
+  FROM [adventureworks2019].[Production].[Product] as p                         -- product
+  left join [adventureworks2019].[Production].[ProductSubcategory] as psc       -- Product Sub Category
+  on p.ProductSubcategoryID=psc.ProductSubcategoryID
+  left join [adventureworks2019].[Production].[ProductCategory] as pc           -- Product Category
+  on pc.ProductCategoryID=psc.ProductCategoryID
+  left join[AdventureWorks2019].[Production].[ProductProductPhoto] ppp         --ProductProductPhoto
+  on p.ProductID = ppp.ProductID 
+  left join [AdventureWorks2019].[Production].[ProductPhoto]pp                --ProductPhoto
+  on ppp.ProductPhotoID = pp.ProductPhotoID 
+  left join [adventureworks2019].[Production].[UnitMeasure] as Size_um          -- Uit
+  on Size_um.UnitMeasureCode=p.SizeUnitMeasureCode
+  left join [adventureworks2019].[Production].[UnitMeasure] as Weight_um
+  on Weight_um.UnitMeasureCode=p.WeightUnitMeasureCode
+GO
+/****** Object:  View [production].[Product_Model_Culture]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ CREATE view [production].[Product_Model_Culture] as
+
+  select
+       p.ProductID
+      ,i.illustrationID
+      ,pd.productDescriptionID
+      ,c.cultureID
+      ,p.Name
+      ,pm.[ProductModelID]
+      ,pm.[Name] as Model_name
+      ,Cast(i.Diagram as nvarchar(max)) as XML_Diagram
+      ,pd.Description
+      ,c.Name as Culture
+      ,cast(pm.[CatalogDescription] as nvarchar(max)) as Discription
+      ,cast(pm.[Instructions] as nvarchar(max)) as Instruction
+      ,pm.[rowguid]
+      ,pm.[ModifiedDate]
+  FROM [adventureworks2019].[Production].[Product] as p
+  left join [adventureworks2019].[Production].[ProductModel] as pm
+  on p.ProductModelID=pm.ProductModelID
+  left join [adventureworks2019].[Production].[ProductModelIllustration] as pmi
+  on pmi.ProductModelID=pm.ProductModelID
+  left join [adventureworks2019].[Production].Illustration as i
+  on i.IllustrationID=pmi.IllustrationID
+  left join [adventureworks2019].[Production].[ProductModelProductDescriptionCulture] as pmpd
+  on pmpd.ProductModelID=pm.ProductModelID
+  left join [adventureworks2019].[Production].[ProductDescription] as pd
+  on pd.ProductDescriptionID=pmpd.ProductDescriptionID
+  left join [adventureworks2019].[Production].[Culture] as c
+  on c.CultureID=pmpd.CultureID
+GO
+/****** Object:  View [production].[Transaction_History]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ CREATE VIEW [production].[Transaction_History] as 
+
+  SELECT 
+       p.[ProductID],
+       th.[TransactionID],
+       th.[ReferenceOrderID],
+       th.[ReferenceOrderLineID],
+        p.[ProductSubcategoryID],
+        p.[ProductModelID],
+        p.[Name] as [ProductName],
+        p.[ProductNumber],
+        p.[ProductLine],
+       th.[TransactionType],
+       th.[Quantity],
+       th.[ActualCost],
+       ch.[StandardCost],
+       lp.[ListPrice] ,
+       ch.[StartDate]as [ProductCost_StartDate],
+       ch.[EndDate] as [ProductCost_EndDate],   
+       lp.[StartDate] as [ProductList_StartDate],
+       lp.[EndDate] as [ProductList_EndDate],
+       th.[TransactionDate]
+       
+ FROM [AdventureWorks2019].[Production].[Product] as p
+ left join[AdventureWorks2019].[Production].[TransactionHistory] as th
+ on p.ProductID = th.ProductID
+ left join [AdventureWorks2019].[Production].[ProductCostHistory] as ch
+ on p.ProductID = ch.ProductID
+ left join [AdventureWorks2019].[Production].[ProductListPriceHistory]lp
+ on p.ProductID = lp.ProductID;
+GO
+/****** Object:  View [production].[Work_operations]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE view [production].[Work_operations] as
+
+select wo.[WorkOrderID]
+      ,wo.[ProductID]
+      ,wor.[LocationID]
+      ,sr.[scrapreasonID]
+      ,wo.[OrderQty]
+      ,wo.[StockedQty]
+      ,wo.[ScrappedQty]
+      ,sr.[name] as ScrapReason
+      ,wor.[OperationSequence]
+      ,wo.[StartDate]
+      ,wo.[EndDate]
+      ,wo.[DueDate]
+      ,wo.[ModifiedDate]
+      ,wor.[ScheduledStartDate]
+      ,wor.[ScheduledEndDate]
+      ,wor.[ActualStartDate]
+      ,wor.[ActualEndDate]
+      ,wor.[ActualResourceHrs]
+      ,wor.[PlannedCost]
+      ,wor.[ActualCost]
+      ,wor.[ModifiedDate] as md
+  FROM [adventureworks2019].[Production].[WorkOrder] as wo
+  left join [adventureworks2019].[Production].[WorkOrderRouting] as wor
+  on wo.WorkOrderID=wor.WorkOrderID
+  left join [adventureworks2019].[Production].ScrapReason as sr
+  on sr.ScrapReasonID=wo.ScrapReasonID
+GO
+/****** Object:  View [Purchasing].[Purchase]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+--CREATE SCHEMA Purchasing 
+CREATE VIEW [Purchasing].[Purchase] as 
+Select
+poh.[PurchaseOrderID], --PurchaseOrderHeader
+pod.[PurchaseOrderDetailID],--PurchaseOrderDetail
+poh.[EmployeeID],
+poh.[VendorID],
+poh.[ShipMethodID],
+pod.[ProductID],
+poh.[RevisionNumber],
+poh.[Status],
+poh.[OrderDate],
+poh.[ShipDate],
+poh.[SubTotal],
+poh.[TaxAmt],
+poh.[Freight],
+poh.[TotalDue],
+pod.[DueDate],
+pod.[OrderQty],
+pod.[UnitPrice],
+pod.[LineTotal],
+pod.[ReceivedQty],
+pod.[RejectedQty],
+pod.[StockedQty],
+sh.[Name] as [ShipName],
+sh.[ShipBase],
+sh.[ShipRate],
+sh.[rowguid],
+poh.[ModifiedDate]
+FROM [AdventureWorks2019].[Purchasing].[PurchaseOrderHeader]poh
+left join [AdventureWorks2019].[Purchasing].[PurchaseOrderDetail]pod
+on poh.PurchaseOrderID = pod.PurchaseOrderID
+left join [AdventureWorks2019].[Purchasing].[ShipMethod]sh
+on poh.ShipMethodID = sh.ShipMethodID;
+
+
+GO
+/****** Object:  View [Purchasing].[Vendor]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [Purchasing].[Vendor] as 
+Select
+v.[BusinessEntityID], --Vendor Table
+pv.[ProductID], --ProductVendor Table
+v.[AccountNumber],
+v.[Name]as [VendorName],
+pv.[AverageLeadTime],
+pv.[StandardPrice],
+pv.[LastReceiptCost],
+pv.[LastReceiptDate],
+pv.[MinOrderQty],
+pv.[MaxOrderQty],
+pv.[OnOrderQty],
+v.[CreditRating],
+v.[PreferredVendorStatus],
+v.[ActiveFlag],
+v.[PurchasingWebServiceURL],
+pv.[UnitMeasureCode],
+v.[ModifiedDate]
+FROM [AdventureWorks2019].[Purchasing].[Vendor]v
+left join  [AdventureWorks2019].[Purchasing].[ProductVendor]pv
+on v.BusinessEntityID = pv.BusinessEntityID;
+
+GO
+/****** Object:  View [sales].[Customer_Demographics]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE view [sales].[Customer_Demographics] as 
+
+with PersonAddress AS (
+SELECT 
+     p.BusinessEntityID as personid
+    ,bea.businessEntityID as BuinessEntityAddressID
+    ,sp.StateProvinceID
+    ,cr.countryRegionCode
+    ,concat_ws(p.Title,' ', p.FirstName,' ', p.[MiddleName],' ',p.[LastName]) as Person_name
+    ,a.City
+    ,a.PostalCode
+    ,sp.Name AS StateName
+    ,cr.Name AS CountryName
+FROM adventureworks2019.Person.Person p
+JOIN adventureworks2019.Person.BusinessEntityAddress bea 
+    ON p.BusinessEntityID = bea.BusinessEntityID
+JOIN adventureworks2019.Person.Address a 
+    ON bea.AddressID = a.AddressID
+JOIN adventureworks2019.Person.StateProvince sp 
+    ON a.StateProvinceID = sp.StateProvinceID
+JOIN adventureworks2019.Person.CountryRegion cr 
+    ON sp.CountryRegionCode = cr.CountryRegionCode)
+
+select 
+       c.[CustomerID]
+      ,pav.[personid]
+      ,pav.BuinessEntityAddressID
+      ,pav.StateProvinceID
+      ,st.territoryID
+      ,c.storeID
+      ,pav.[Person_name]
+      ,pav.[City]
+      ,pav.[PostalCode]
+      ,pav.[StateName]
+      ,pav.[CountryName]
+      ,st.[Name] as TerritoryName
+      ,st.[CountryRegionCode]
+      ,st.[Group]      
+      ,c.[AccountNumber]     
+      ,s.[Name] as Store_name
+      ,s.[SalesPersonID]
+      ,sp.[Person_name] as Sales_Person
+      ,s.[ModifiedDate] as Store_Modified_date
+      ,c.[rowguid]
+      ,c.[ModifiedDate]
+    FROM [adventureworks2019].[Sales].[Customer] as c
+  left join adventureworks2019.sales.SalesTerritory as st
+  on c.TerritoryID=st.TerritoryID
+  left join [adventureworks2019].[Sales].[Store] as s
+  on s.BusinessEntityID=c.StoreID
+  left join adventureworks2019.Person.Person as p
+  on c.PersonID=p.BusinessEntityID
+  left join PersonAddress as pav
+  on pav.personid=c.PersonID
+  left join PersonAddress as sp
+  on sp.personid=s.salespersonid
+GO
+/****** Object:  View [sales].[Payment_Details]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE view [sales].[Payment_Details] as
+
+with PersonDetails AS (
+SELECT 
+     p.BusinessEntityID as personid
+    ,bea.BusinessEntityID as businessEntityAddressID
+    ,a.addressID
+    ,sp.stateProvinceID
+    ,concat_ws(p.Title,' ', p.FirstName,' ', p.[MiddleName],' ',p.[LastName]) as Person_name
+    ,p.PersonType
+    ,a.City
+    ,a.PostalCode
+    ,sp.Name AS StateName
+    ,cr.Name AS CountryName
+FROM adventureworks2019.Person.Person p
+left JOIN adventureworks2019.Person.BusinessEntityAddress bea 
+    ON p.BusinessEntityID = bea.BusinessEntityID
+left JOIN adventureworks2019.Person.Address a 
+    ON bea.AddressID = a.AddressID
+left JOIN adventureworks2019.Person.StateProvince sp 
+    ON a.StateProvinceID = sp.StateProvinceID
+left JOIN adventureworks2019.Person.CountryRegion cr 
+    ON sp.CountryRegionCode = cr.CountryRegionCode)
+
+select 
+       pcc.BusinessEntityID as Personid
+      ,cc.creditCardID
+      ,pd.businessEntityAddressID
+      ,pd.addressID
+      ,pd.stateProvinceID
+      ,pd.PersonType
+      ,pd.Person_name
+      ,pd.City
+      ,pd.StateName
+      ,pd.CountryName
+      ,cc.[CardType]
+      ,cc.[CardNumber]
+      ,cc.[ExpMonth]
+      ,cc.[ExpYear]
+      ,cc.[ModifiedDate]
+from adventureworks2019.Sales.PersonCreditCard as pcc
+join PersonDetails as pd
+on pcc.BusinessEntityID=pd.personid
+left join adventureworks2019.Sales.CreditCard as cc
+on cc.CreditCardID=pcc.CreditCardID
+GO
+/****** Object:  View [sales].[Product_Offers]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE view [sales].[Product_Offers] as
+select
+        sop.ProductID
+       ,so.SpecialOfferID
+       ,p.Name
+       ,p.StandardCost
+       ,p.ListPrice
+       ,so.DiscountPct
+       ,so.Description
+       ,so.MinQty
+       ,coalesce(so.maxqty,0) as MaxQty
+       ,so.Type
+       ,so.Category
+       ,so.StartDate
+       ,so.EndDate
+       ,so.rowguid
+       ,so.ModifiedDate
+from adventureworks2019.Sales.SpecialOfferProduct as sop
+join adventureworks2019.Production.Product as p 
+on sop.ProductID=p.ProductID
+left join adventureworks2019.Sales.SpecialOffer as so
+on so.SpecialOfferID=sop.SpecialOfferID
+
+GO
+/****** Object:  View [sales].[Sales_Details]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [sales].[Sales_Details] AS
+
+WITH product_detail AS (
+    SELECT
+         p.ProductID,
+         ps.productsubcategoryID,
+         pc.productcategoryID,
+         p.Name AS Product_Name,
+         ps.Name AS Product_SubCategory,
+         pc.Name AS Product_Category
+    FROM adventureworks2019.Production.Product AS p
+    LEFT JOIN adventureworks2019.Production.ProductSubcategory AS ps
+        ON p.ProductSubcategoryID = ps.ProductSubcategoryID
+    LEFT JOIN adventureworks2019.Production.ProductCategory AS pc
+        ON ps.ProductCategoryID = pc.ProductCategoryID
+    ),
+
+    sales_reason as (
+select 
+		hsr.salesorderid
+       ,sr.salesreasonID
+	   ,sr.name as SalesReason
+	   ,sr.ReasonType 
+from adventureworks2019.sales.SalesOrderHeaderSalesReason as hsr
+left join adventureworks2019.sales.SalesReason as sr
+on hsr.SalesReasonID=sr.SalesReasonID
+)
+
+SELECT
+     sod.SalesOrderID,
+     pd.productsubcategoryID,
+     pd.productcategoryID,
+     sr.SalesReasonID,
+     sod.ProductID,
+     sod.CarrierTrackingNumber,
+     sod.OrderQty,
+     sod.UnitPrice,
+     sod.UnitPriceDiscount,
+     sod.LineTotal,
+     pd.Product_Name,
+     pd.Product_SubCategory,
+     pd.Product_Category,
+     CASE 
+        when sr.SalesReason is null then 'Other'
+        else sr.SalesReason
+     END as SalesReason,
+     CASE 
+        when sr.ReasonType is null then 'Other'
+        else sr.ReasonType
+     END as ReasonType,
+     soh.RevisionNumber,
+     soh.OrderDate,
+     soh.DueDate,
+     soh.ShipDate,
+     soh.Status,
+     soh.OnlineOrderFlag,
+     soh.SalesOrderNumber,
+     soh.PurchaseOrderNumber,
+     soh.AccountNumber,
+     soh.CreditCardApprovalCode,
+     soh.SubTotal,
+     soh.TaxAmt,
+     soh.Freight,
+     soh.TotalDue,
+     soh.Comment,
+     sod.rowguid AS salesorder_details_rowguid,
+     soh.rowguid AS salesorder_header_rowguid,
+     soh.ModifiedDate AS salesorder_header_modified_date,
+     sod.ModifiedDate AS salesorder_details_modified_date
+
+FROM adventureworks2019.Sales.SalesOrderDetail AS sod
+JOIN adventureworks2019.Sales.SalesOrderHeader AS soh
+    ON sod.SalesOrderID = soh.SalesOrderID
+LEFT JOIN product_detail AS pd
+    ON pd.ProductID = sod.ProductID
+LEFT JOIN sales_reason as sr
+    ON sr.SalesOrderID=sod.SalesOrderID
+GO
+/****** Object:  View [sales].[SalesPerson_Details]    Script Date: 5/1/2026 6:49:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE view [sales].[SalesPerson_Details] as
+
+    with PersonAddress AS (
+SELECT 
+     p.BusinessEntityID as personid
+    ,bea.businessEntityID as BuinessEntityAddressID
+    ,sp.StateProvinceID
+    ,concat_ws(' ',p.Title,' ', p.FirstName,' ', p.[MiddleName],' ',p.[LastName]) as Person_name
+    ,a.City
+    ,a.PostalCode
+    ,sp.Name AS StateName
+    ,cr.Name AS CountryName
+FROM adventureworks2019.Person.Person p
+JOIN adventureworks2019.Person.BusinessEntityAddress bea 
+    ON p.BusinessEntityID = bea.BusinessEntityID
+JOIN adventureworks2019.Person.Address a 
+    ON bea.AddressID = a.AddressID
+JOIN adventureworks2019.Person.StateProvince sp 
+    ON a.StateProvinceID = sp.StateProvinceID
+JOIN adventureworks2019.Person.CountryRegion cr 
+    ON sp.CountryRegionCode = cr.CountryRegionCode),
+
+state_tax as (
+select 
+        sp.StateProvinceID
+       ,sp.TerritoryID
+       ,st.TaxRate
+       ,st.Name as Tax_name
+from  adventureworks2019.person.StateProvince as sp
+join adventureworks2019.Sales.salestaxrate as st
+on st.StateProvinceID=sp.StateProvinceID)
+
+select 
+       sp.BusinessEntityID as SalesPersonid
+      ,pa.personid
+      ,pa.BuinessEntityAddressID
+      ,pa.StateProvinceID
+      ,st.territoryID
+      ,pa.person_name as SalesPerson
+      ,s.name as Storename
+      ,st.[name] as Territory
+      ,st.[CountryRegionCode]
+      ,coalesce(sp.[SalesQuota],0) as SalesQuota
+      ,sp.[Bonus]
+      ,sp.[CommissionPct]
+      ,sp.[SalesYTD]
+      ,sp.[SalesLastYear]
+      ,coalesce(state_tax.[TaxRate],0) as TaxRate
+      ,state_tax.[Tax_name]
+from adventureworks2019.Sales.SalesPerson as sp
+left join adventureworks2019.Sales.Store as s
+on sp.BusinessEntityID=s.SalesPersonID
+left join adventureworks2019.Sales.SalesPersonQuotaHistory as spqh
+on spqh.BusinessEntityID=sp.BusinessEntityID
+left join adventureworks2019.Sales.Salesterritory as st
+on st.TerritoryID=sp.TerritoryID
+left join personAddress as pa
+on pa.personid=sp.BusinessEntityID
+left join state_tax 
+on state_tax.TerritoryID=sp.TerritoryID
+
+
+
+GO
