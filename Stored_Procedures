@@ -1,0 +1,1400 @@
+USE [adventureworks_silver]
+GO
+/****** Object:  StoredProcedure [dbo].[Create_Execution_Log_Table]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Create_Execution_Log_Table]
+as
+begin
+CREATE TABLE dbo.Execution_Log (
+    session_id UNIQUEIDENTIFIER NOT NULL,
+    execution_id UNIQUEIDENTIFIER PRIMARY KEY,
+    procedure_name NVARCHAR(100) NOT NULL,
+    sequence_no INT NOT NULL,
+    start_time DATETIME NOT NULL DEFAULT GETDATE(),
+    end_time DATETIME NULL,
+    status NVARCHAR(20) NOT NULL,
+    error_message NVARCHAR(MAX) NULL,
+
+    FOREIGN KEY (session_id)
+    REFERENCES adventureworks_silver.dbo.session_log (session_id)
+    )
+end
+GO
+/****** Object:  StoredProcedure [dbo].[Create_Session_log_table]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Create_Session_log_table]
+as
+begin
+
+CREATE TABLE dbo.Session_Log (
+    session_id UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NULL,
+    duration_ms INT NULL,
+    status NVARCHAR(20) NOT NULL,
+    error_message NVARCHAR(MAX) NULL
+    )
+end
+GO
+/****** Object:  StoredProcedure [dbo].[SP_HumanResources_Employee]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE Procedure [dbo].[SP_HumanResources_Employee]
+    @rows_inserted INT OUTPUT,
+    @rows_deleted INT OUTPUT
+as
+begin
+
+    DECLARE @inserted INT = 0;
+    DECLARE @deleted INT = 0;
+
+	Truncate table [dbo].[input_HumanResources_Employee];
+
+	Insert into [dbo].[input_HumanResources_Employee]
+
+    (
+       [BusinessEntityID]
+      ,[DepartmentID]
+      ,[ShiftID]
+      ,[Joining_StartDate]
+      ,[EndDate]
+      ,[LoginID]
+      ,[NationalIDNumber]
+      ,[OrganizationNode]
+      ,[OrganizationLevel]
+      ,[JobTitle]
+      ,[BirthDate]
+      ,[MaritalStatus]
+      ,[Gender]
+      ,[HireDate]
+      ,[VacationHours]
+      ,[SickLeaveHours]
+      ,[ShiftName]
+      ,[Shift_StartTime]
+      ,[Shift_EndTime]
+      ,[Department_Name]
+      ,[DepartmentGroupName]
+      ,[RateChangeDate]
+      ,[Rate]
+      ,[PayFrequency]
+      ,[ModifiedDate]
+    )
+	Select
+	   [BusinessEntityID]
+      ,[DepartmentID]
+      ,[ShiftID]
+      ,[Joining_StartDate]
+      ,[EndDate]
+      ,[LoginID]
+      ,[NationalIDNumber]
+      ,[OrganizationNode]
+      ,[OrganizationLevel]
+      ,[JobTitle]
+      ,[BirthDate]
+      ,[MaritalStatus]
+      ,[Gender]
+      ,[HireDate]
+      ,[VacationHours]
+      ,[SickLeaveHours]
+      ,[ShiftName]
+      ,[Shift_StartTime]
+      ,[Shift_EndTime]
+      ,[Department_Name]
+      ,[DepartmentGroupName]
+      ,[RateChangeDate]
+      ,[Rate]
+      ,[PayFrequency]
+      ,[ModifiedDate]
+	   FROM [adventureworks_silver].[HumanResources].[Employee];
+
+       DELETE a
+       from [dbo].[output_HumanResources_Employee] a
+       inner join [dbo].[input_HumanResources_employee] b
+       on a.BusinessEntityID = b.BusinessEntityID;
+
+       SET @deleted = @@ROWCOUNT;
+
+	Insert into [dbo].[output_HumanResources_Employee]
+	Select*from [dbo].[input_HumanResources_employee]
+
+        SET @inserted = @@ROWCOUNT;
+
+    SET @rows_inserted = @inserted;
+    SET @rows_deleted = @deleted;
+
+end
+
+-- exec [dbo].[SP_HumanResources_Employee]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Load_Master]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE PROCEDURE [dbo].[SP_Load_Master]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @session_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @execution_id UNIQUEIDENTIFIER;
+    DECLARE @procedure NVARCHAR(100);
+    DECLARE @sequence_no INT = 1;
+
+
+    BEGIN TRY
+
+      -- Run session first 
+        -------------------------
+
+        /*
+        INSERT INTO dbo.Session_Log (session_id, procedure_name, start_time, end_time, status, error_message)
+        VALUES (@session_id,'Run_session', getdate(), null, 'Running', null);[dbo].[Execution_Log]
+
+        EXEC dbo.Run_Session
+
+        UPDATE Session_Log
+        SET End_time = getdate(), status = 'Success'
+        Where session_id=@session_ID
+        */
+
+        INSERT INTO dbo.Session_Log (session_id, start_time, end_time, status, error_message)
+        VALUES (@session_id, getdate(), null, 'Running', null);
+
+        -------------------------
+  -- SP_Sales_Product_Offers (S-1,1)
+        -------------------------
+
+        DECLARE @rows_inserted INT = 0;
+        DECLARE @rows_deleted INT = 0;
+
+        SET @procedure = 'SP_Sales_Product_Offers';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.sp_sales_product_offers
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+
+        -------------------------
+-- sp_sales_sales_details (S-2,2)
+        -------------------------
+        
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'sp_sales_sales_details';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.sp_sales_sales_details
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ------------------------
+-- SP_Sales_Customer_Demographics (S-3,3)
+        -------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Sales_Customer_Demographics';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Sales_Customer_Demographics
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        -------------------------
+-- SP_Sales_Payment_Details (S-4,4)
+        -------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Sales_Payment_Details';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Sales_Payment_Details
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Sales_SalesPerson_Details] (S-5,5)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Sales_SalesPerson_Details';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Sales_SalesPerson_Details
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_HumanResources_Employee] (HR-1,6)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_HumanResources_Employee';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_HumanResources_Employee
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        --------------------------
+-- [dbo].[SP_Person_Person_Details] (Person-1,7)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Person_Person_Details';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Person_Person_Details
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Production_Documentview] (P-1,8)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Person_Person_Details';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Person_Person_Details
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Production_Product_Model_Culture] (P-2,9)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Production_Product_Model_Culture';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Production_Product_Model_Culture
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Production_Transaction_History] (P-3,10)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Production_Transaction_History';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Production_Transaction_History
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Production_Work_Operations] (P-4,11)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Production_Work_Operations';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Production_Work_Operations
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Purchasing_Purchase] (Purchasing-1,12)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Purchasing_Purchase';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Purchasing_Purchase
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+        ---------------------------
+-- [dbo].[SP_Purchasing_Vendor] (Purchasing-2,13)
+        ---------------------------
+
+        SET @rows_inserted = 0;
+        SET @rows_deleted = 0;
+
+        SET @procedure = 'SP_Purchasing_Vendor';
+        SET @execution_id = NEWID();
+
+        INSERT INTO dbo.Execution_Log
+        (session_id, execution_id, procedure_name, sequence_no, start_time, end_time, rows_inserted, rows_deleted, status, error_message)
+        VALUES (@session_id, @execution_id, @procedure, @sequence_no, GETDATE(), NULL, NULL, NULL, 'RUNNING', NULL);
+
+        EXEC dbo.SP_Purchasing_Vendor
+        @rows_inserted OUTPUT,
+        @rows_deleted OUTPUT
+
+        UPDATE dbo.Execution_Log
+        SET   end_time = GETDATE(),
+              status = 'SUCCESS',
+              rows_inserted = @rows_inserted,
+              rows_deleted = @rows_deleted
+        WHERE execution_id = @execution_id AND procedure_name = @procedure;
+
+    ------------------------------------
+-- Update Session log table
+
+        UPDATE Session_Log
+        SET End_time = getdate(), status = 'Success'
+        Where session_id=@session_ID
+    ---------------------------------
+
+    END
+    TRY
+    BEGIN CATCH
+
+        UPDATE dbo.Execution_Log
+        SET end_time = GETDATE(),
+            status = 'FAILED',
+            error_message = ERROR_MESSAGE()
+        WHERE execution_id = @execution_id
+          AND procedure_name = @procedure
+          AND session_id = @session_id;
+
+        THROW; -- important for debugging & job failure
+
+        END CATCH
+    END;
+
+  --exec adventureworks_silver.dbo.Sp_load_master
+
+
+ -- ===========================
+
+
+  --sequence_no,rows_inserted,rows_deleted
+
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Person_Person_Details]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Person_Person_Details]
+as
+begin
+	Truncate table [dbo].[input_person_person_Details];
+
+	Insert into [dbo].[input_person_person_Details]
+	Select
+	[BusinessEntityID]
+      ,[PersonID]
+      ,[ContactTypeID]
+      ,[AddressID]
+      ,[TerritoryID]
+      ,[AddressTypeID]
+      ,[PhoneNumberTypeID]
+      ,[EmailAddressID]
+      ,[StateProvinceID]
+      ,[BusinessEntity_IDB]
+      ,[PersonType]
+      ,[Title]
+      ,[FullName]
+      ,[EmailPromotion]
+      ,[PhoneNumber]
+      ,[PhoneName]
+      ,[ContactName]
+      ,[PasswordHash]
+      ,[PasswordSalt]
+      ,[EmailAddress]
+      ,[AddressLine1]
+      ,[AddressLine2]
+      ,[City]
+      ,[PostalCode]
+      ,[SpatialLocation]
+      ,[AddressTypeName]
+      ,[StateProvinceCode]
+      ,[StateProvinceName]
+      ,[CountryRegionCode]
+      ,[CountryRegionName]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].Person.Person_Details;
+
+      DELETE a
+    FROM [dbo].[output_person_person_Details] a
+    INNER JOIN [dbo].[input_person_person_Details] b
+    ON a. [BusinessEntityID] = b. [BusinessEntityID];
+
+	Insert into [dbo].[output_person_person_Details]
+	Select*from [dbo].[input_person_person_Details]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Production_Documentview]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   procedure [dbo].[SP_Production_Documentview]
+as
+begin
+	Truncate table [dbo].[input_production_documentview];
+
+	Insert into [dbo].[input_production_documentview]
+
+    (
+    [ProductID]
+      ,[DocumentNode]
+      ,[DocumentLevel]
+      ,[Title]
+      ,[Owner]
+      ,[FileName]
+      ,[FileExtension]
+      ,[Revision]
+      ,[ChangeNumber]
+      ,[Status]
+      ,[DocumentSummary]
+      ,[Document]
+      ,[rowguid]
+      ,[ModifiedDate]
+      
+
+    )
+	Select
+	[ProductID]
+      ,[DocumentNode]
+      ,[DocumentLevel]
+      ,[Title]
+      ,[Owner]
+      ,[FileName]
+      ,[FileExtension]
+      ,[Revision]
+      ,[ChangeNumber]
+      ,[Status]
+      ,[DocumentSummary]
+      ,[Document]
+      ,[rowguid]
+      ,[ModifiedDate]
+      
+      from [adventureworks_silver].production.DocumentView
+
+      Delete a 
+        from [dbo].[output_production_documentview] a 
+        inner join [dbo].[input_production_documentview] b 
+        on a.ProductID = b.ProductID
+
+	Insert into [dbo].[output_production_documentview]
+	Select*from [dbo].[input_production_documentview]
+end
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Production_Product]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  procedure [dbo].[SP_Production_Product]
+as
+begin
+	Truncate table [dbo].[input_production_Product];
+
+	Insert into [dbo].[input_production_Product]
+    (
+       [ProductID]
+      ,[productSubCategoryID]
+      ,[ProductCategoryID]
+      ,[productPhotoID]
+      ,[Name]
+      ,[ProductNumber]
+      ,[MakeFlag]
+      ,[FinishedGoodsFlag]
+      ,[Color]
+      ,[SafetyStockLevel]
+      ,[ReorderPoint]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[Size]
+      ,[Size_Unit]
+      ,[Weight]
+      ,[Weight_Unite]
+      ,[Sub_Category]
+      ,[Category]
+      ,[Primary]
+      ,[ThumbNailPhoto]
+      ,[ThumbnailPhotoFileName]
+      ,[LargePhoto]
+      ,[LargePhotoFileName]
+      ,[DaysToManufacture]
+      ,[ProductLine]
+      ,[Class]
+      ,[Style]
+      ,[SellStartDate]
+      ,[SellEndDate]
+      ,[DiscontinuedDate]
+      ,[rowguid]
+      ,[ModifiedDate]
+    )
+	Select
+	   [ProductID]
+      ,[productSubCategoryID]
+      ,[ProductCategoryID]
+      ,[productPhotoID]
+      ,[Name]
+      ,[ProductNumber]
+      ,[MakeFlag]
+      ,[FinishedGoodsFlag]
+      ,[Color]
+      ,[SafetyStockLevel]
+      ,[ReorderPoint]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[Size]
+      ,[Size_Unit]
+      ,[Weight]
+      ,[Weight_Unite]
+      ,[Sub_Category]
+      ,[Category]
+      ,[Primary]
+      ,[ThumbNailPhoto]
+      ,[ThumbnailPhotoFileName]
+      ,[LargePhoto]
+      ,[LargePhotoFileName]
+      ,[DaysToManufacture]
+      ,[ProductLine]
+      ,[Class]
+      ,[Style]
+      ,[SellStartDate]
+      ,[SellEndDate]
+      ,[DiscontinuedDate]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].production.Product;
+
+      Delete a 
+     from [dbo].[output_production_Product] a 
+     inner join [dbo].[input_production_Product] b 
+     on a.ProductID = b.ProductID;
+
+	Insert into [dbo].[output_production_Product]
+	Select*from [dbo].[input_production_Product]
+  end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Production_Product_Model_Culture]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   procedure [dbo].[SP_Production_Product_Model_Culture]
+as
+begin
+	Truncate table [dbo].[input_production_product_model_culture];
+
+	Insert into [dbo].[input_production_product_model_culture]
+    (
+       [ProductID]
+      ,[illustrationID]
+      ,[productDescriptionID]
+      ,[cultureID]
+      ,[Name]
+      ,[ProductModelID]
+      ,[Model_name]
+      ,[XML_Diagram]
+      ,[Description]
+      ,[Culture]
+      ,[Discription]
+      ,[Instruction]
+      ,[rowguid]
+      ,[ModifiedDate]
+    )
+	Select
+	   [ProductID]
+      ,[illustrationID]
+      ,[productDescriptionID]
+      ,[cultureID]
+      ,[Name]
+      ,[ProductModelID]
+      ,[Model_name]
+      ,[XML_Diagram]
+      ,[Description]
+      ,[Culture]
+      ,[Discription]
+      ,[Instruction]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].production.product_model_culture;
+
+      Delete a 
+  from [dbo].[output_production_product_model_culture] a 
+  inner join [dbo].[input_production_product_model_culture] b 
+  on a.ProductID = b.ProductID ;
+
+	Insert into [dbo].[output_production_product_model_culture]
+	Select*from [dbo].[input_production_product_model_culture]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Production_Transaction_History]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Production_Transaction_History]
+as
+begin
+	Truncate table [dbo].[input_production_transaction_history];
+
+	Insert into [dbo].[input_production_transaction_history]
+    (
+       [ProductID]
+      ,[TransactionID]
+      ,[ReferenceOrderID]
+      ,[ReferenceOrderLineID]
+      ,[ProductSubcategoryID]
+      ,[ProductModelID]
+      ,[ProductName]
+      ,[ProductNumber]
+      ,[ProductLine]
+      ,[TransactionType]
+      ,[Quantity]
+      ,[ActualCost]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[ProductCost_StartDate]
+      ,[ProductCost_EndDate]
+      ,[ProductList_StartDate]
+      ,[ProductList_EndDate]
+      ,[TransactionDate]
+    )
+	Select
+	   [ProductID]
+      ,[TransactionID]
+      ,[ReferenceOrderID]
+      ,[ReferenceOrderLineID]
+      ,[ProductSubcategoryID]
+      ,[ProductModelID]
+      ,[ProductName]
+      ,[ProductNumber]
+      ,[ProductLine]
+      ,[TransactionType]
+      ,[Quantity]
+      ,[ActualCost]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[ProductCost_StartDate]
+      ,[ProductCost_EndDate]
+      ,[ProductList_StartDate]
+      ,[ProductList_EndDate]
+      ,[TransactionDate]
+      from [adventureworks_silver].production.Transaction_History;
+
+      Delete a 
+  from [dbo].[output_production_transaction_history] a 
+  inner join [dbo].[input_production_transaction_history] b 
+  on a.ProductID = b.ProductID ;
+
+	Insert into [dbo].[output_production_transaction_history]
+	Select*from [dbo].[input_production_transaction_history]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Production_Work_Operations]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Production_Work_Operations]
+as
+begin
+	Truncate table [dbo].[input_production_work_operations];
+
+	Insert into [dbo].[input_production_work_operations]
+    (
+       [WorkOrderID]
+      ,[ProductID]
+      ,[LocationID]
+      ,[scrapreasonID]
+      ,[OrderQty]
+      ,[StockedQty]
+      ,[ScrappedQty]
+      ,[ScrapReason]
+      ,[OperationSequence]
+      ,[StartDate]
+      ,[EndDate]
+      ,[DueDate]
+      ,[ModifiedDate]
+      ,[ScheduledStartDate]
+      ,[ScheduledEndDate]
+      ,[ActualStartDate]
+      ,[ActualEndDate]
+      ,[ActualResourceHrs]
+      ,[PlannedCost]
+      ,[ActualCost]
+      ,[md]
+    )
+	Select
+	   [WorkOrderID]
+      ,[ProductID]
+      ,[LocationID]
+      ,[scrapreasonID]
+      ,[OrderQty]
+      ,[StockedQty]
+      ,[ScrappedQty]
+      ,[ScrapReason]
+      ,[OperationSequence]
+      ,[StartDate]
+      ,[EndDate]
+      ,[DueDate]
+      ,[ModifiedDate]
+      ,[ScheduledStartDate]
+      ,[ScheduledEndDate]
+      ,[ActualStartDate]
+      ,[ActualEndDate]
+      ,[ActualResourceHrs]
+      ,[PlannedCost]
+      ,[ActualCost]
+      ,[md]
+      from [adventureworks_silver].production.Work_operations;
+
+      Delete a 
+      from [dbo].[output_production_work_operations] a 
+      inner join [dbo].[input_production_work_operations] b 
+      on a.[WorkOrderID] = b.[WorkOrderID] ;
+
+	Insert into [dbo].[output_production_work_operations]
+	Select*from [dbo].[input_production_work_operations]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Purchasing_Purchase]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE  procedure [dbo].[SP_Purchasing_Purchase]
+as
+begin
+	Truncate table [dbo].[input_Purchasing_Purchase];
+
+	Insert into [dbo].[input_Purchasing_Purchase]
+    (
+       [PurchaseOrderID]
+      ,[PurchaseOrderDetailID]
+      ,[EmployeeID]
+      ,[VendorID]
+      ,[ShipMethodID]
+      ,[ProductID]
+      ,[RevisionNumber]
+      ,[Status]
+      ,[OrderDate]
+      ,[ShipDate]
+      ,[SubTotal]
+      ,[TaxAmt]
+      ,[Freight]
+      ,[TotalDue]
+      ,[DueDate]
+      ,[OrderQty]
+      ,[UnitPrice]
+      ,[LineTotal]
+      ,[ReceivedQty]
+      ,[RejectedQty]
+      ,[StockedQty]
+      ,[ShipName]
+      ,[ShipBase]
+      ,[ShipRate]
+      ,[rowguid]
+      ,[ModifiedDate]
+    )
+	Select
+	   [PurchaseOrderID]
+      ,[PurchaseOrderDetailID]
+      ,[EmployeeID]
+      ,[VendorID]
+      ,[ShipMethodID]
+      ,[ProductID]
+      ,[RevisionNumber]
+      ,[Status]
+      ,[OrderDate]
+      ,[ShipDate]
+      ,[SubTotal]
+      ,[TaxAmt]
+      ,[Freight]
+      ,[TotalDue]
+      ,[DueDate]
+      ,[OrderQty]
+      ,[UnitPrice]
+      ,[LineTotal]
+      ,[ReceivedQty]
+      ,[RejectedQty]
+      ,[StockedQty]
+      ,[ShipName]
+      ,[ShipBase]
+      ,[ShipRate]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].Purchasing.Purchase;
+
+      Delete a 
+      from [dbo].[output_Purchasing_Purchase] a 
+      inner join [dbo].[input_Purchasing_Purchase] b 
+      on a.[PurchaseOrderID] = b.[PurchaseOrderID] ;
+
+	Insert into [dbo].[output_Purchasing_Purchase]
+	Select*from [dbo].[input_Purchasing_Purchase]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Purchasing_Vendor]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   procedure [dbo].[SP_Purchasing_Vendor]
+as
+begin
+	Truncate table [dbo].[input_purchasing_vendor];
+
+	Insert into [dbo].[input_purchasing_vendor]
+    (
+       [BusinessEntityID]
+      ,[ProductID]
+      ,[AccountNumber]
+      ,[VendorName]
+      ,[AverageLeadTime]
+      ,[StandardPrice]
+      ,[LastReceiptCost]
+      ,[LastReceiptDate]
+      ,[MinOrderQty]
+      ,[MaxOrderQty]
+      ,[OnOrderQty]
+      ,[CreditRating]
+      ,[PreferredVendorStatus]
+      ,[ActiveFlag]
+      ,[PurchasingWebServiceURL]
+      ,[UnitMeasureCode]
+      ,[ModifiedDate]
+    )
+	Select
+       [BusinessEntityID]
+      ,[ProductID]
+      ,[AccountNumber]
+      ,[VendorName]
+      ,[AverageLeadTime]
+      ,[StandardPrice]
+      ,[LastReceiptCost]
+      ,[LastReceiptDate]
+      ,[MinOrderQty]
+      ,[MaxOrderQty]
+      ,[OnOrderQty]
+      ,[CreditRating]
+      ,[PreferredVendorStatus]
+      ,[ActiveFlag]
+      ,[PurchasingWebServiceURL]
+      ,[UnitMeasureCode]
+      ,[ModifiedDate]
+      from [adventureworks_silver].Purchasing.Vendor;
+
+	Insert into [dbo].[output_purchasing_vendor]
+	Select*from [dbo].[input_purchasing_vendor]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Sales_Customer_Demographics]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Sales_Customer_Demographics]
+as
+begin
+	Truncate table [dbo].[input_sales_Customer_Demographics];
+
+	Insert into [dbo].[input_sales_Customer_Demographics]
+    (
+       [CustomerID]
+      ,[personid]
+      ,[BuinessEntityAddressID]
+      ,[StateProvinceID]
+      ,[territoryID]
+      ,[storeID]
+      ,[Person_name]
+      ,[City]
+      ,[PostalCode]
+      ,[StateName]
+      ,[CountryName]
+      ,[TerritoryName]
+      ,[CountryRegionCode]
+      ,[Group]
+      ,[AccountNumber]
+      ,[Store_name]
+      ,[SalesPersonID]
+      ,[Sales_Person]
+      ,[Store_Modified_date]
+      ,[rowguid]
+      ,[ModifiedDate]
+    )
+	Select
+	   [CustomerID]
+      ,[personid]
+      ,[BuinessEntityAddressID]
+      ,[StateProvinceID]
+      ,[territoryID]
+      ,[storeID]
+      ,[Person_name]
+      ,[City]
+      ,[PostalCode]
+      ,[StateName]
+      ,[CountryName]
+      ,[TerritoryName]
+      ,[CountryRegionCode]
+      ,[Group]
+      ,[AccountNumber]
+      ,[Store_name]
+      ,[SalesPersonID]
+      ,[Sales_Person]
+      ,[Store_Modified_date]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].sales.Customer_Demographics;
+
+      DELETE a
+       FROM [dbo].[output_sales_Customer_Demographics] a
+       INNER JOIN [dbo].[input_sales_Customer_Demographics] b
+       ON a.[CustomerID] = b.[CustomerID];
+
+	Insert into [dbo].[output_sales_Customer_Demographics]
+	Select*from [dbo].[input_sales_Customer_Demographics]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Sales_Payment_Details]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   procedure [dbo].[SP_Sales_Payment_Details]
+as
+begin
+	Truncate table [dbo].[input_sales_payment_details];
+
+	Insert into [dbo].[input_sales_payment_details]
+    (
+       [Personid]
+      ,[creditCardID]
+      ,[businessEntityAddressID]
+      ,[addressID]
+      ,[stateProvinceID]
+      ,[PersonType]
+      ,[Person_name]
+      ,[City]
+      ,[StateName]
+      ,[CountryName]
+      ,[CardType]
+      ,[CardNumber]
+      ,[ExpMonth]
+      ,[ExpYear]
+      ,[ModifiedDate]
+    )
+	Select
+	   [Personid]
+      ,[creditCardID]
+      ,[businessEntityAddressID]
+      ,[addressID]
+      ,[stateProvinceID]
+      ,[PersonType]
+      ,[Person_name]
+      ,[City]
+      ,[StateName]
+      ,[CountryName]
+      ,[CardType]
+      ,[CardNumber]
+      ,[ExpMonth]
+      ,[ExpYear]
+      ,[ModifiedDate]
+      from [adventureworks_silver].sales.Payment_details;
+
+      DELETE a
+      FROM [dbo].[output_sales_payment_details] a
+      INNER JOIN [dbo].[input_sales_payment_details] b
+      ON a.Personid= b.Personid;
+
+	Insert into [dbo].[output_sales_payment_details]
+	Select*from [dbo].[input_sales_payment_details]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Sales_Product_Offers]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Sales_Product_Offers]
+    @rows_inserted INT OUTPUT,
+    @rows_deleted INT OUTPUT
+as
+begin
+
+    DECLARE @inserted INT = 0;
+    DECLARE @deleted INT = 0;
+
+	Truncate table [dbo].[input_sales_product_offers];
+
+	Insert into [dbo].[input_sales_product_offers]
+    ( 
+       [ProductID]
+      ,[SpecialOfferID]
+      ,[Name]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[DiscountPct]
+      ,[Description]
+      ,[MinQty]
+      ,[MaxQty]
+      ,[Type]
+      ,[Category]
+      ,[StartDate]
+      ,[EndDate]
+      ,[rowguid]
+      ,[ModifiedDate]
+      )
+	Select
+	   [ProductID]
+      ,[SpecialOfferID]
+      ,[Name]
+      ,[StandardCost]
+      ,[ListPrice]
+      ,[DiscountPct]
+      ,[Description]
+      ,[MinQty]
+      ,[MaxQty]
+      ,[Type]
+      ,[Category]
+      ,[StartDate]
+      ,[EndDate]
+      ,[rowguid]
+      ,[ModifiedDate]
+      from [adventureworks_silver].sales.Product_Offers;
+
+      DELETE a
+      FROM [dbo].[output_sales_product_offers] a
+      INNER JOIN [dbo].[input_sales_product_offers] b
+        ON a.ProductID= b.ProductID;
+
+      SET @deleted = @@ROWCOUNT;
+
+
+	Insert into [dbo].[output_sales_product_offers]
+	Select*from [dbo].[input_sales_product_offers]
+
+      SET @inserted = @@ROWCOUNT;
+
+    SET @rows_inserted = @inserted;
+    SET @rows_deleted = @deleted;
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Sales_Sales_Details]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Sales_Sales_Details]
+as
+begin
+	Truncate table [dbo].[input_sales_sales_details];
+
+	Insert into [dbo].[input_sales_sales_details]
+    (
+       [SalesOrderID]
+      ,[productsubcategoryID]
+      ,[productcategoryID]
+      ,[SalesReasonID]
+      ,[ProductID]
+      ,[CarrierTrackingNumber]
+      ,[OrderQty]
+      ,[UnitPrice]
+      ,[UnitPriceDiscount]
+      ,[LineTotal]
+      ,[Product_Name]
+      ,[Product_SubCategory]
+      ,[Product_Category]
+      ,[SalesReason]
+      ,[ReasonType]
+      ,[RevisionNumber]
+      ,[OrderDate]
+      ,[DueDate]
+      ,[ShipDate]
+      ,[Status]
+      ,[OnlineOrderFlag]
+      ,[SalesOrderNumber]
+      ,[PurchaseOrderNumber]
+      ,[AccountNumber]
+      ,[CreditCardApprovalCode]
+      ,[SubTotal]
+      ,[TaxAmt]
+      ,[Freight]
+      ,[TotalDue]
+      ,[Comment]
+      ,[salesorder_details_rowguid]
+      ,[salesorder_header_rowguid]
+      ,[salesorder_header_modified_date]
+      ,[salesorder_details_modified_date]
+    )
+	Select
+	   [SalesOrderID]
+      ,[productsubcategoryID]
+      ,[productcategoryID]
+      ,[SalesReasonID]
+      ,[ProductID]
+      ,[CarrierTrackingNumber]
+      ,[OrderQty]
+      ,[UnitPrice]
+      ,[UnitPriceDiscount]
+      ,[LineTotal]
+      ,[Product_Name]
+      ,[Product_SubCategory]
+      ,[Product_Category]
+      ,[SalesReason]
+      ,[ReasonType]
+      ,[RevisionNumber]
+      ,[OrderDate]
+      ,[DueDate]
+      ,[ShipDate]
+      ,[Status]
+      ,[OnlineOrderFlag]
+      ,[SalesOrderNumber]
+      ,[PurchaseOrderNumber]
+      ,[AccountNumber]
+      ,[CreditCardApprovalCode]
+      ,[SubTotal]
+      ,[TaxAmt]
+      ,[Freight]
+      ,[TotalDue]
+      ,[Comment]
+      ,[salesorder_details_rowguid]
+      ,[salesorder_header_rowguid]
+      ,[salesorder_header_modified_date]
+      ,[salesorder_details_modified_date]
+      from [adventureworks_silver].sales.Sales_Details;
+
+      DELETE a
+      FROM [dbo].[output_sales_sales_details] a
+      INNER JOIN [dbo].[input_sales_sales_details] b
+        ON a.SalesOrderID= b.SalesOrderID;
+
+	Insert into [dbo].[output_sales_sales_details]
+	Select*from [dbo].[input_sales_sales_details]
+end;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Sales_SalesPerson_Details]    Script Date: 5/1/2026 5:39:04 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   procedure [dbo].[SP_Sales_SalesPerson_Details]
+as
+begin
+	Truncate table [dbo].[input_sales_salesPerson_details];
+
+	Insert into [dbo].[input_sales_salesPerson_details]
+    (
+       [SalesPersonid]
+      ,[personid]
+      ,[BuinessEntityAddressID]
+      ,[StateProvinceID]
+      ,[territoryID]
+      ,[SalesPerson]
+      ,[Storename]
+      ,[Territory]
+      ,[CountryRegionCode]
+      ,[SalesQuota]
+      ,[Bonus]
+      ,[CommissionPct]
+      ,[SalesYTD]
+      ,[SalesLastYear]
+      ,[TaxRate]
+      ,[Tax_name]
+    )
+	Select
+	   [SalesPersonid]
+      ,[personid]
+      ,[BuinessEntityAddressID]
+      ,[StateProvinceID]
+      ,[territoryID]
+      ,[SalesPerson]
+      ,[Storename]
+      ,[Territory]
+      ,[CountryRegionCode]
+      ,[SalesQuota]
+      ,[Bonus]
+      ,[CommissionPct]
+      ,[SalesYTD]
+      ,[SalesLastYear]
+      ,[TaxRate]
+      ,[Tax_name]
+      from [adventureworks_silver].sales.SalesPerson_Details;
+
+      DELETE a
+      FROM [dbo].[output_sales_salesPerson_details] a
+      INNER JOIN [dbo].[input_sales_salesPerson_details] b
+        ON a.SalesPersonid= b.SalesPersonid;
+
+	Insert into [dbo].[output_sales_salesPerson_details]
+	Select*from [dbo].[input_sales_salesPerson_details]
+end;
+GO
